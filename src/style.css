@@ -1,0 +1,89 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* overflow: hidden; */
+
+    overflow-x: hidden;
+
+    display: flex;
+    justify-content: center;
+
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background-color: rgb(67, 67, 67);
+}
+
+.sample-layout {
+    width: auto;
+    height: auto;
+  
+    margin: 5rem;
+
+    display: grid;
+    grid-auto-rows: 1fr;
+    grid-template-columns: repeat(3, 25vw);
+    column-gap: .5rem;
+    row-gap: 3rem;
+
+    background: transparent;
+}
+
+.sample {
+    counter-increment: sample;
+    background-color: transparent;
+    aspect-ratio: 1 / 1;
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+}
+
+.sample > iframe {
+    width: 100%;
+    height: 100%;
+
+    border: none;
+
+    overflow: hidden;
+
+    /* border-radius: 1rem; */
+}
+
+.sample::before {
+    content: counter(sample, decimal-leading-zero);
+
+    color: aliceblue;
+}
+
+.chart-example {
+    width: 100%;
+    height: 100%;
+}
+
+.chart-example {
+    width: 100%;
+    height: 100%;
+}
+
+.chart {
+    width: 100%;
+    height: 100%;
+}
+
+.explanation {
+    background-color: rgb(90, 90, 90);
+    color: white;
+    border-radius: 1rem;
+
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display: flex;
+
+    font-size: 1.2vw;
+}
