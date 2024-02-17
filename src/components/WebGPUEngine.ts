@@ -1,10 +1,26 @@
+import { EmptyFontRenderer, FontRenderer } from "../fonts/FontRenderer.ts";
+import { invariant } from "../fonts/invariant.ts";
 import { ChartSettings } from "./Chart.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
+import initFontRenderer, {
+  LoadFontProps,
+  LoadFontSettings,
+} from "./WebGPUEngine/initFontRenderer.ts";
 
 export interface WebGPUEngineSettings {
   debug?: boolean;
   log?: boolean;
 }
+
+interface RenderFnProps {
+  device: GPUDevice;
+  context: GPUCanvasContext;
+  width: number;
+  height: number;
+  font: FontRenderer | EmptyFontRenderer;
+}
+
+export type RenderFn = (props: RenderFnProps) => Promise<void> | void;
 
 class WebGPUEngine {
   device!: GPUDevice;
@@ -37,7 +53,9 @@ class WebGPUEngine {
 
   private async initialize(canvas: HTMLCanvasElement) {
     try {
-      const adapter = await navigator.gpu.requestAdapter({ powerPreference: "low-power" });
+      const adapter = await navigator.gpu.requestAdapter({
+        powerPreference: "low-power",
+      });
       if (!adapter) {
         this.error("WebGPU adapter is not available.");
         return;
@@ -45,7 +63,8 @@ class WebGPUEngine {
 
       const device = await adapter.requestDevice({
         requiredLimits: {
-          maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
+          maxStorageBufferBindingSize:
+            adapter.limits.maxStorageBufferBindingSize,
         },
       });
 
@@ -81,7 +100,10 @@ class WebGPUEngine {
     }
   }
 
-  private observeSizeChanges(canvas: HTMLCanvasElement, postCall?: (width: number, height: number) => void) {
+  private observeSizeChanges(
+    canvas: HTMLCanvasElement,
+    postCall?: (width: number, height: number) => void
+  ) {
     new ElementSizeWatcher(canvas, (width, height) => {
       canvas.width = width;
       canvas.height = height;
@@ -92,20 +114,41 @@ class WebGPUEngine {
     });
   }
 
-  render(renderFunction: (device: GPUDevice, context: GPUCanvasContext, width: number, height: number) => Promise<void> | void) {
+  render(postRender: RenderFn) {
     this.observeSizeChanges(this.canvas, async (width, height) => {
       this.log("Observing canvas size changes");
 
       await this.initialize(this.canvas);
 
-      if (!renderFunction) {
-        this.error("No render function provided");
+      const font = await this.loadFont(
+        {
+          fontSource: this.settings?.fontSource,
+          device: this.device,
+          canvas: this.canvas,
+          context: this.context,
+        },
+        {
+          debug: this.settings?.debug ?? false,
+        }
+      );
 
-        return;
-      }
+      invariant(postRender, "No post-render function provided");
 
-      renderFunction(this.device, this.context, width, height);
+      postRender({
+        device: this.device,
+        context: this.context,
+        font: font,
+        width,
+        height,
+      });
     });
+  }
+
+  loadFont(
+    props: LoadFontProps,
+    settings: LoadFontSettings
+  ): Promise<FontRenderer | EmptyFontRenderer> {
+    return initFontRenderer({ ...props }, { ...settings });
   }
 }
 
