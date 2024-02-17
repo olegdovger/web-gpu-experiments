@@ -1,8 +1,10 @@
-import WebGPUEngine from "./WebGPUEngine.ts";
+import { invariant } from "../fonts/invariant.ts";
+import WebGPUEngine, { RenderFn } from "./WebGPUEngine.ts";
 
 export interface ChartSettings {
   debug?: boolean;
   log?: boolean;
+  fontSource?: string;
 }
 
 class Chart {
@@ -16,6 +18,8 @@ class Chart {
 
     element.appendChild(canvas);
     element.style.overflow = "hidden";
+    element.style.width = "100%";
+    element.style.height = "100%";
 
     this.settings = settings ?? { debug: true, log: true };
 
@@ -34,15 +38,15 @@ class Chart {
     console.error("Chart:", ...args);
   }
 
-  render(renderFunction: (device: GPUDevice, context: GPUCanvasContext, width: number, height: number) => Promise<void> | void) {
+  async render(renderFunction: RenderFn) {
     if (!renderFunction) {
       this.error("No render function provided");
 
       return;
     }
 
-    this.engine.render((device, context, width, height) => {
-      renderFunction(device, context, width, height);
+    this.engine.render(async ({device, context, width, height, font}) => {
+      renderFunction({device, context, width, height, font});
     });
   }
 }

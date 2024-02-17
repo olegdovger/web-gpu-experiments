@@ -4,17 +4,16 @@ import createPipeline from "../../src/renderers/pipelines/line-strip.pipeline.ts
 import shaderCode from "./shader.wgsl?raw";
 import shaderCoorfLineCode from "./shader-coord-line.wgsl?raw";
 import makeVertexBufferAndLayout from "../../src/utils/makeVertexBufferAndLayout.ts";
+import makeVertexBuffer from "../../src/utils/makeVertexBuffer.ts";
+import commonSettings from "../common.settings.ts";
 
-const chat = new Chart(document.getElementById("chart"), {
-  debug: true,
-  log: true,
-});
+const chart = new Chart(document.getElementById("chart"), commonSettings);
 
-chat.render((device, context) => {
+chart.render(({device, context}) => {
   renderPass(device, context, (passEncoder) => {
     const points = [0.05, 0.05, 0.95, 0.05, 0.95, 0.95, 0.05, 0.05];
 
-    const { buffer, layout } = makeVertexBufferAndLayout({
+    const { buffer, layout: _layout } = makeVertexBufferAndLayout({
       vertices1DArray: points,
       device,
       shaderLocation: 0,
@@ -24,7 +23,7 @@ chat.render((device, context) => {
       device,
       code: shaderCode,
       vertexState: {
-        buffers: [layout],
+        buffers: [_layout],
       },
     });
 
@@ -34,18 +33,28 @@ chat.render((device, context) => {
 
     const coordLine = [0.001, 0.999, 0.001, 0.001, 0.999, 0.001];
 
-    const { buffer: coordLineBuffer, layout: coordLineLayout } =
-      makeVertexBufferAndLayout({
-        vertices1DArray: coordLine,
-        device,
-        shaderLocation: 0,
-      });
+    const coordLineBuffer = makeVertexBuffer({
+      vertices1DArray: coordLine,
+      device,
+    });
+
+    const layout: GPUVertexBufferLayout = {
+      arrayStride: 8,
+      attributes: [
+        {
+          shaderLocation: 0,
+          offset: 0,
+          format: "float32x2",
+        },
+      ],
+      stepMode: "vertex",
+    };
 
     const coordLinePipeline = createPipeline({
       device,
       code: shaderCoorfLineCode,
       vertexState: {
-        buffers: [coordLineLayout],
+        buffers: [layout],
       },
     });
 

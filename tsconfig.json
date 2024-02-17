@@ -20,10 +20,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "types": ["vite/client", "@webgpu/types", "@types/dom-webcodecs"]
-//    "typeRoots": [ "./node_modules/@webgpu/types"]
+    //    "typeRoots": [ "./node_modules/@webgpu/types"]
   },
-  "include": [
-    "src",
-    "../../node_modules/@webgpu/types/dist/index.d.ts"
-, "samples/external-data/index.ts"  ]
+  "include": ["src", "../../node_modules/@webgpu/types/dist/index.d.ts", "samples/**/*.ts"]
 }

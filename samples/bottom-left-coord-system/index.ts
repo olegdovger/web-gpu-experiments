@@ -4,13 +4,11 @@ import createPipeline from "../../src/renderers/pipelines/line-strip.pipeline.ts
 import shaderCode from "./shader.wgsl?raw";
 import shaderCoorfLineCode from "./shader-coord-line.wgsl?raw";
 import makeVertexBufferAndLayout from "../../src/utils/makeVertexBufferAndLayout.ts";
+import commonSettings from "../common.settings.ts";
 
-const chat = new Chart(document.getElementById("chart"), {
-  debug: true,
-  log: true,
-});
+const chart = new Chart(document.getElementById("chart"), commonSettings);
 
-chat.render((device, context) => {
+chart.render(({device, context}) => {
   renderPass(device, context, (passEncoder) => {
     const points = [0.05, 0.05, 0.95, 0.05, 0.95, 0.95, 0.05, 0.05];
 

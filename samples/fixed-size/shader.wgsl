@@ -6,6 +6,7 @@ struct VertexOutput {
 override width: f32;
 override height: f32;
 override offset: f32;
+override devicePixelRatio: f32;
 
 @vertex
 fn main_vertex(
