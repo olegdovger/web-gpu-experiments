@@ -1,7 +1,7 @@
 import { EmptyFontRenderer, FontRenderer } from "../../fonts/FontRenderer";
 import createFontTexture from "../../fonts/createFontTexture";
-import { parseTTF } from "../../fonts/parseTTF";
-import { prepareLookups } from "../../fonts/prepareLookups";
+import { TTF, parseTTF } from "../../fonts/parseTTF";
+import { Lookups, prepareLookups } from "../../fonts/prepareLookups";
 import { renderFontAtlas } from "../../fonts/renderFontAtlas";
 
 export interface LoadFontProps {
@@ -12,29 +12,17 @@ export interface LoadFontProps {
 }
 
 export interface LoadFontSettings {
+  width: number;
+  height: number;
   debug: boolean;
 }
 
 const SAMPLE_COUNT = 4;
 
-const fontCacheStoragePath = "__localStorageFontCache__";
-const PERSIST_FONT_CACHE_KEY = window.PERSIST_FONT_CACHE_KEY === true;
-
-function ab2str(buf: ArrayBuffer): string {
-  const data = new Int8Array(buf).reduce(
-    (acc, i) => (acc += String.fromCharCode.apply(null, [i])),
-    ""
-  );
-  return data;
-}
-function str2ab(str: string): ArrayBuffer {
-  var buf = new ArrayBuffer(str.length); // 2 bytes for each char
-  var bufView = new Int8Array(buf);
-  for (var i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
+let loadedFontFile: ArrayBuffer;
+let parsedTTF: TTF;
+let fontAtlas: ImageBitmap;
+let preparedLookups: Lookups;
 
 async function initFontRenderer(
   props: LoadFontProps,
@@ -43,19 +31,6 @@ async function initFontRenderer(
   const { fontSource, device, canvas, context } = props;
   const { debug } = settings;
 
-  if(!fontSource) {
-    return new EmptyFontRenderer();
-  }
-
-  const fontFile = await fetch(fontSource).then((result) => result.arrayBuffer());
-
-  const ttf = parseTTF(fontFile, { debug });
-  const lookups = prepareLookups(ttf);
-  const fontAtlas = await renderFontAtlas(lookups, fontFile, {
-    useSDF: true,
-  });
-  const fontAtlasTexture = await createFontTexture(device, fontAtlas);
-
   const colorTexture = device.createTexture({
     label: "color",
     size: { width: canvas.width, height: canvas.height },
@@ -63,10 +38,34 @@ async function initFontRenderer(
     format: "bgra8unorm",
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
   });
-  const colorTextureView = colorTexture.createView({ label: "color" });
 
-  const fontRenderer = new FontRenderer(device, context, colorTextureView);
-  fontRenderer.setFont(lookups, fontAtlasTexture);
+  const colorTextureView = colorTexture.createView({ label: "color" });
+  const fontRenderer = new FontRenderer({
+    device,
+    context,
+    colorTextureView,
+    width: canvas.width,
+    height: canvas.height,
+  });
+
+  if (!fontSource) {
+    return new EmptyFontRenderer();
+  }
+
+  loadedFontFile ||= await fetch(fontSource).then((result) =>
+    result.arrayBuffer()
+  );
+
+  parsedTTF ||= parseTTF(loadedFontFile, { debug });
+  preparedLookups ||= prepareLookups(parsedTTF);
+
+  fontAtlas ||= await renderFontAtlas(preparedLookups, loadedFontFile, {
+    useSDF: true,
+  });
+
+  const fontAtlasTexture = await createFontTexture(device, fontAtlas);
+
+  fontRenderer.setFont(preparedLookups, fontAtlasTexture);
 
   return fontRenderer;
 }

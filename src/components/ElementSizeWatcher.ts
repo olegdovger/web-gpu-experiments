@@ -1,7 +1,6 @@
 class ElementSizeWatcher {
   private resizeObserver: ResizeObserver;
 
-  private debounceInterval: number = 500;
   private debounce(
     interval: number,
     callback: (...args: any[]) => void
@@ -21,12 +20,15 @@ class ElementSizeWatcher {
   }
   constructor(
     canvas: HTMLCanvasElement,
+    debounceInterval: number = 100,
     callback: (width: number, height: number) => void
   ) {
     const element = canvas.parentElement;
 
+    const _debounceInterval = debounceInterval < 100 ? 100 : debounceInterval;
+
     this.resizeObserver = new ResizeObserver(
-      this.debounce(this.debounceInterval, (entries: ResizeObserverEntry[]) => {
+      this.debounce(_debounceInterval, (entries: ResizeObserverEntry[]) => {
         const entry = entries.find((entry) => entry.target === element);
         if (!entry) return;
 
@@ -39,7 +41,11 @@ class ElementSizeWatcher {
 
     if (!element) return;
 
-    this.resizeObserver.observe(element, { box: "device-pixel-content-box" });
+    try {
+      this.resizeObserver.observe(element, { box: "device-pixel-content-box" });
+    } catch {
+      this.resizeObserver.observe(element, { box: "content-box" });
+    }
   }
 
   disconnect() {

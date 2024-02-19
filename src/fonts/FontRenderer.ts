@@ -3,13 +3,19 @@ import { Vec2 } from "./math/Vec2";
 import { Vec4 } from "./math/Vec4";
 import { Lookups } from "./prepareLookups";
 import { getTextShape } from "./shapeText";
+import shaderCode from "./shaders/text.shader.wgsl?raw";
 
 const TEXT_BUFFER_SIZE = 16 * 1000;
 
-const width = window.innerWidth;
-const height = window.innerHeight;
 const SAMPLE_COUNT = 4;
 
+interface FontRendererProps {
+  device: GPUDevice;
+  context: GPUCanvasContext;
+  colorTextureView: GPUTextureView;
+  width: number;
+  height: number;
+}
 interface BaseFontRenderer {
   setFont: (lookups: Lookups, fontAtlasTexture: GPUTexture) => void;
   text: (text: string, position: Vec2, fontSize: number, color: Vec4) => void;
@@ -17,14 +23,20 @@ interface BaseFontRenderer {
 }
 
 export class EmptyFontRenderer implements BaseFontRenderer {
-  text(text: string, position: Vec2, fontSize: number, color: Vec4) {
-    console.warn("Method 'text' not implemented. You might forget to use 'fontSource'");
+  text(_text: string, _position: Vec2, _fontSize: number, _color: Vec4) {
+    console.warn(
+      "Method 'text' not implemented. You might forget to use 'fontSource'"
+    );
   }
   render() {
-    console.warn("Method 'render' Not implemented. You might forget to use 'fontSource'");
+    console.warn(
+      "Method 'render' Not implemented. You might forget to use 'fontSource'"
+    );
   }
-  setFont(lookups: Lookups, fontAtlasTexture: GPUTexture) {
-    console.warn("Method 'setFont' Not implemented. You might forget to use 'fontSource'");
+  setFont(_lookups: Lookups, _fontAtlasTexture: GPUTexture) {
+    console.warn(
+      "Method 'setFont' Not implemented. You might forget to use 'fontSource'"
+    );
   }
 }
 
@@ -41,73 +53,24 @@ export class FontRenderer extends EmptyFontRenderer {
   sampler: GPUSampler;
   fontLookups: Lookups | null = null;
 
-  constructor(
-    private device: GPUDevice,
-    private readonly context: GPUCanvasContext,
-    private colorTextureView: GPUTextureView
-  ) {
+  device: GPUDevice;
+  context: GPUCanvasContext;
+  colorTextureView: GPUTextureView;
+  width: number;
+  height: number;
+
+  constructor(props: FontRendererProps) {
     super();
 
-    const textShader = `
-      struct VertexInput {
-        @location(0) position: vec2f,
-        @builtin(instance_index) instance: u32
-      };
+    const { device, context, colorTextureView, width, height } = props;
 
-      struct VertexOutput {
-        @builtin(position) position: vec4f,
-        @location(1) @interpolate(flat) instance: u32,
-        @location(2) @interpolate(linear) vertex: vec2f,
-        @location(3) @interpolate(linear) uv: vec2f,
-      };
+    this.device = device;
+    this.colorTextureView = colorTextureView;
+    this.context = context;
+    this.width = width;
+    this.height = height;
 
-      struct Glyph {
-        position: vec2f,
-        _unused: f32,
-        fontSize: f32,
-        color: vec4f,
-        size: vec2f,
-        uv: vec2f,
-        uvSize: vec2f,
-        window: vec2f,
-      };
-
-      struct GlyphData {
-        glyphs: array<Glyph>,
-      };
-
-      @group(0) @binding(0) var<storage> text: GlyphData;
-      @group(0) @binding(1) var fontAtlasSampler: sampler;
-      @group(0) @binding(2) var fontAtlas: texture_2d<f32>;
-
-      @vertex
-      fn vertexMain(input: VertexInput) -> VertexOutput {
-        var output: VertexOutput;
-        let g = text.glyphs[input.instance];
-        let vertex = mix(g.position.xy, g.position.xy + g.size, input.position);
-
-        output.position = vec4f(vertex / g.window * 2 - 1, 0, 1);
-        output.position.y = -output.position.y;
-        output.vertex = vertex;
-        output.uv = mix(g.uv, g.uv + g.uvSize, input.position);
-        output.instance = input.instance;
-        return output;
-      }
-
-      @fragment
-      fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
-        let g = text.glyphs[input.instance];
-        let distance = textureSample(fontAtlas, fontAtlasSampler, input.uv).a;
-
-        var width = mix(0.4, 0.1, clamp(g.fontSize, 0, 40) / 40.0);
-        width /= ${window.devicePixelRatio};
-        let alpha = g.color.a * smoothstep(0.5 - width, 0.5 + width, distance);
-
-        return vec4f(g.color.rgb, alpha);
-      }
-    `;
-
-    const textModule = device.createShaderModule({ code: textShader });
+    const textModule = device.createShaderModule({ code: shaderCode });
 
     this.vertexBuffer = device.createBuffer({
       label: "vertex",
@@ -193,6 +156,9 @@ export class FontRenderer extends EmptyFontRenderer {
             },
           },
         ],
+        constants: {
+          devicePixelRatio: window.devicePixelRatio,
+        },
       },
       multisample: { count: SAMPLE_COUNT },
     });
@@ -229,6 +195,8 @@ export class FontRenderer extends EmptyFontRenderer {
     invariant(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
+    let totalSizeWidth = 0;
+
     for (let i = 0; i < shape.positions.length; i++) {
       let shapePosition = shape.positions[i].add(position);
       let size = shape.sizes[i];
@@ -251,10 +219,14 @@ export class FontRenderer extends EmptyFontRenderer {
       this.glyphData[this.glyphCount * struct + 11] = uv.y;
       this.glyphData[this.glyphCount * struct + 12] = uv.z;
       this.glyphData[this.glyphCount * struct + 13] = uv.w;
-      this.glyphData[this.glyphCount * struct + 14] = width;
-      this.glyphData[this.glyphCount * struct + 15] = height;
+      this.glyphData[this.glyphCount * struct + 14] =
+        this.width / window.devicePixelRatio;
+      this.glyphData[this.glyphCount * struct + 15] =
+        this.height / window.devicePixelRatio;
 
       this.glyphCount += 1;
+
+      totalSizeWidth += size.x;
     }
   }
 
@@ -279,14 +251,7 @@ export class FontRenderer extends EmptyFontRenderer {
 
     this.device.queue.writeBuffer(this.textBuffer, 0, this.glyphData);
 
-    renderPass.setViewport(
-      0,
-      0,
-      width * window.devicePixelRatio,
-      height * window.devicePixelRatio,
-      0,
-      1
-    );
+    renderPass.setViewport(0, 0, this.width, this.height, 0, 1);
     renderPass.setVertexBuffer(0, this.vertexBuffer);
 
     renderPass.setPipeline(this.textPipeline);

@@ -1,7 +1,7 @@
 import Chart from "../../src/components/Chart.ts";
 import { renderPass } from "../../src/renderers/baseRenderer.ts";
 import createPipeline from "../../src/renderers/pipelines/line-strip.pipeline.ts";
-import commonSettings from "../common.settings.ts";
+import commonSettings from "../../src/common.settings.ts";
 import shaderCodePlain from "./shader.plain.wgsl?raw";
 
 const chart = new Chart(document.getElementById("chart"), commonSettings);
