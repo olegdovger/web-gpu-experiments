@@ -3,7 +3,7 @@ import { renderPass } from "../../src/renderers/baseRenderer.ts";
 import createPipeline from "../../src/renderers/pipelines/line-strip.pipeline.ts";
 import shaderCodeWithInputPoints from "./shader.input.points.wgsl?raw";
 import makeVertexBufferAndLayout from "../../src/utils/makeVertexBufferAndLayout.ts";
-import commonSettings from "../common.settings.ts";
+import commonSettings from "../../src/common.settings.ts";
 
 const chart = new Chart(document.getElementById("chart"), commonSettings);
 

@@ -1,7 +1,7 @@
 import Chart from "../../src/components/Chart";
 import { Vec2 } from "../../src/fonts/math/Vec2";
 import { Vec4 } from "../../src/fonts/math/Vec4";
-import commonSettings from "../common.settings";
+import commonSettings from "../../src/common.settings";
 
 const chart = new Chart(document.getElementById("chart"), {
   ...commonSettings,

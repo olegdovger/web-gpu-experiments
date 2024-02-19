@@ -495,7 +495,8 @@ function readGPOSTable(
 
   invariant(major === 1 && minor === 0, "Only GPOS version 1.0 is supported.");
 
-  const scriptListOffset = reader.getUint16();
+  reader.getUint16(); // scriptListOffset
+  
   const featureListOffset = reader.getUint16();
   const lookupListOffset = reader.getUint16();
 

@@ -102,16 +102,23 @@ class WebGPUEngine {
 
   private observeSizeChanges(
     canvas: HTMLCanvasElement,
-    postCall?: (width: number, height: number) => void
+    postCall?: (width: number, height: number) => Promise<void>
   ) {
-    new ElementSizeWatcher(canvas, (width, height) => {
-      canvas.width = width;
-      canvas.height = height;
+    new ElementSizeWatcher(
+      canvas,
+      this.settings?.debounceInterval,
+      async (width, height) => {
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
 
-      this.debug("New width:", width, ", new height:", height);
+        this.debug("New width:", width, ", new height:", height);
 
-      postCall?.(width, height);
-    });
+        await postCall?.(width, height);
+
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      }
+    );
   }
 
   render(postRender: RenderFn) {
@@ -120,7 +127,7 @@ class WebGPUEngine {
 
       await this.initialize(this.canvas);
 
-      const font = await this.loadFont(
+      const loadedFont = await this.loadFont(
         {
           fontSource: this.settings?.fontSource,
           device: this.device,
@@ -129,6 +136,8 @@ class WebGPUEngine {
         },
         {
           debug: this.settings?.debug ?? false,
+          width,
+          height,
         }
       );
 
@@ -137,7 +146,7 @@ class WebGPUEngine {
       postRender({
         device: this.device,
         context: this.context,
-        font: font,
+        font: loadedFont,
         width,
         height,
       });

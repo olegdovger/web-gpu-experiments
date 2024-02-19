@@ -1,10 +1,10 @@
-import { invariant } from "../fonts/invariant.ts";
 import WebGPUEngine, { RenderFn } from "./WebGPUEngine.ts";
 
 export interface ChartSettings {
   debug?: boolean;
   log?: boolean;
   fontSource?: string;
+  debounceInterval?: number;
 }
 
 class Chart {
@@ -45,8 +45,8 @@ class Chart {
       return;
     }
 
-    this.engine.render(async ({device, context, width, height, font}) => {
-      renderFunction({device, context, width, height, font});
+    this.engine.render(async ({ device, context, width, height, font }) => {
+      renderFunction({ device, context, width, height, font });
     });
   }
 }

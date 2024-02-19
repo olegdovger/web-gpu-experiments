@@ -35,7 +35,7 @@ export async function renderFontAtlas(
     alphabet?: string;
     useSDF?: boolean;
   }
-) {
+): Promise<ImageBitmap> {
   const canvas = document.createElement("canvas");
   canvas.width = lookups.atlas.width;
   canvas.height = lookups.atlas.height;
