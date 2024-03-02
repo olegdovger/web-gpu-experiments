@@ -39,19 +39,19 @@ class WebGPUEngine {
     this.debug("initialized");
   }
 
-  private log(...args: any[]) {
+  private log(...args: unknown[]) {
     if (!this.settings?.log) return;
 
     console.log("WebGPUEngine:", ...args);
   }
 
-  private debug(...args: any[]) {
+  private debug(...args: unknown[]) {
     if (!this.settings?.debug) return;
 
     console.debug("WebGPUEngine:", ...args);
   }
 
-  private error(...args: any[]) {
+  private error(...args: unknown[]) {
     console.error("WebGPUEngine:", ...args);
   }
 

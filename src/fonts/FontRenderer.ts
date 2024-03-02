@@ -184,8 +184,6 @@ export class FontRenderer {
     invariant(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
-    let totalSizeWidth = 0;
-
     for (let i = 0; i < shape.positions.length; i++) {
       const shapePosition = shape.positions[i].add(position);
       const size = shape.sizes[i];
@@ -222,8 +220,6 @@ export class FontRenderer {
         this.height / window.devicePixelRatio;
 
       this.glyphCount += 1;
-
-      totalSizeWidth += size.x;
     }
   }
 

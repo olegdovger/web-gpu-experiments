@@ -13,7 +13,7 @@ chart.render(({ font }) => {
     "The quick brown fox jumps over the lazy dog",
     new Vec2(16, 16),
     16,
-    new Vec4(0, 0, 0, 1),
+    new Vec4(1, 1, 1, 1),
   );
 
   font.text(
