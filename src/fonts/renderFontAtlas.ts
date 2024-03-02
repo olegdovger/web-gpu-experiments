@@ -34,7 +34,7 @@ export async function renderFontAtlas(
   options?: {
     alphabet?: string;
     useSDF?: boolean;
-  }
+  },
 ): Promise<ImageBitmap> {
   const canvas = document.createElement("canvas");
   canvas.width = lookups.atlas.width;
@@ -68,7 +68,7 @@ export async function renderFontAtlas(
       String.fromCharCode(glyph.id),
       // Additionally offset by glyph (X, Y).
       position.x - glyph.x * scale + ATLAS_GAP,
-      position.y + size.y + glyph.y * scale - ATLAS_GAP
+      position.y + size.y + glyph.y * scale - ATLAS_GAP,
     );
   }
 
@@ -78,13 +78,13 @@ export async function renderFontAtlas(
       0,
       0,
       lookups.atlas.width,
-      lookups.atlas.height
+      lookups.atlas.height,
     );
     const sdfData = toSDF(
       imageData,
       lookups.atlas.width,
       lookups.atlas.height,
-      ATLAS_RADIUS
+      ATLAS_RADIUS,
     );
     context.putImageData(sdfData, 0, 0);
   }

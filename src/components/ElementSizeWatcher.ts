@@ -3,7 +3,7 @@ class ElementSizeWatcher {
 
   private debounce(
     interval: number,
-    callback: (...args: any[]) => void
+    callback: (...args: any[]) => void,
   ): (...args: any[]) => void {
     let debounceTimeoutId: number | undefined;
 
@@ -14,14 +14,14 @@ class ElementSizeWatcher {
 
       debounceTimeoutId = setTimeout(
         () => callback.apply(this, args),
-        interval
+        interval,
       );
     };
   }
   constructor(
     canvas: HTMLCanvasElement,
     debounceInterval: number = 100,
-    callback: (width: number, height: number) => void
+    callback: (width: number, height: number) => void,
   ) {
     const element = canvas.parentElement;
 
@@ -36,7 +36,7 @@ class ElementSizeWatcher {
         const height = entry.contentBoxSize[0].blockSize;
 
         callback(width, height);
-      })
+      }),
     );
 
     if (!element) return;

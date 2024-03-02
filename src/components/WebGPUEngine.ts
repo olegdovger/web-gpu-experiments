@@ -1,15 +1,19 @@
-import { EmptyFontRenderer, FontRenderer } from "../fonts/FontRenderer.ts";
+import { FontRenderer } from "../fonts/FontRenderer.ts";
 import { invariant } from "../fonts/invariant.ts";
-import { ChartSettings } from "./Chart.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
 import initFontRenderer, {
   LoadFontProps,
   LoadFontSettings,
 } from "./WebGPUEngine/initFontRenderer.ts";
 
-export interface WebGPUEngineSettings {
+export interface EngineSettings {
+  clearValue: GPUColorDict;
+  fontColorValue: GPUColorDict;
+  fontSource: string;
+
   debug?: boolean;
   log?: boolean;
+  debounceInterval?: number;
 }
 
 interface RenderFnProps {
@@ -17,7 +21,7 @@ interface RenderFnProps {
   context: GPUCanvasContext;
   width: number;
   height: number;
-  font: FontRenderer | EmptyFontRenderer;
+  font: FontRenderer;
 }
 
 export type RenderFn = (props: RenderFnProps) => Promise<void> | void;
@@ -26,11 +30,11 @@ class WebGPUEngine {
   device!: GPUDevice;
   context!: GPUCanvasContext;
   canvas: HTMLCanvasElement;
-  settings?: ChartSettings;
+  settings: EngineSettings;
 
-  constructor(canvas: HTMLCanvasElement, settings?: ChartSettings) {
+  constructor(canvas: HTMLCanvasElement, settings: EngineSettings) {
     this.canvas = canvas;
-    this.settings = settings ?? { debug: false, log: false };
+    this.settings = settings;
 
     this.debug("initialized");
   }
@@ -102,7 +106,7 @@ class WebGPUEngine {
 
   private observeSizeChanges(
     canvas: HTMLCanvasElement,
-    postCall?: (width: number, height: number) => Promise<void>
+    postCall?: (width: number, height: number) => Promise<void>,
   ) {
     new ElementSizeWatcher(
       canvas,
@@ -117,7 +121,7 @@ class WebGPUEngine {
 
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
-      }
+      },
     );
   }
 
@@ -135,10 +139,12 @@ class WebGPUEngine {
           context: this.context,
         },
         {
-          debug: this.settings?.debug ?? false,
+          debug: this.settings.debug ?? false,
+          clearValue: this.settings.clearValue,
+          fontColorValue: this.settings.fontColorValue,
           width,
           height,
-        }
+        },
       );
 
       invariant(postRender, "No post-render function provided");
@@ -155,8 +161,8 @@ class WebGPUEngine {
 
   loadFont(
     props: LoadFontProps,
-    settings: LoadFontSettings
-  ): Promise<FontRenderer | EmptyFontRenderer> {
+    settings: LoadFontSettings,
+  ): Promise<FontRenderer> {
     return initFontRenderer({ ...props }, { ...settings });
   }
 }

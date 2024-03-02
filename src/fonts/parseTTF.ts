@@ -44,12 +44,12 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
       const calculated = calculateChecksum(
         reader.getDataSlice(
           tables[tag].offset,
-          4 * Math.ceil(tables[tag].length / 4)
-        )
+          4 * Math.ceil(tables[tag].length / 4),
+        ),
       );
       invariant(
         calculated === tables[tag].checksum,
-        `Checksum for table ${tag} is invalid.`
+        `Checksum for table ${tag} is invalid.`,
       );
     }
   }
@@ -74,7 +74,7 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
     reader,
     tables["hmtx"].offset,
     ttf.maxp?.numGlyphs,
-    ttf.hhea?.numberOfHMetrics
+    ttf.hhea?.numberOfHMetrics,
   );
 
   invariant(tables["loca"].offset, `loca ${shared}`);
@@ -82,7 +82,7 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
     reader,
     tables["loca"].offset,
     ttf.maxp?.numGlyphs,
-    ttf.head?.indexToLocFormat
+    ttf.head?.indexToLocFormat,
   );
 
   invariant(tables["glyf"].offset, `glyf ${shared}`);
@@ -90,7 +90,7 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
     reader,
     tables["glyf"].offset,
     ttf.loca,
-    ttf.head?.indexToLocFormat
+    ttf.head?.indexToLocFormat,
   );
 
   if (tables["GPOS"]) {
@@ -107,7 +107,7 @@ function calculateChecksum(data: Uint8Array): number {
   const nlongs = data.length / 4;
   invariant(
     nlongs === Math.floor(nlongs),
-    "Data length must be divisible by 4."
+    "Data length must be divisible by 4.",
   );
 
   let sum = 0;
@@ -204,7 +204,7 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
 
   invariant(
     format === 4,
-    `Unsupported cmap table format. Expected 4, found ${format}.`
+    `Unsupported cmap table format. Expected 4, found ${format}.`,
   );
 
   const length = reader.getUint16();
@@ -309,8 +309,8 @@ function readMaxpTable(reader: BinaryReader, offset: number): MaxpTable {
   invariant(
     versionString,
     `Unsupported maxp table version (expected 0x00005000 or 0x00010000 but found ${version.toString(
-      16
-    )}).`
+      16,
+    )}).`,
   );
   const numGlyphs = reader.getUint16();
 
@@ -389,7 +389,7 @@ function readHmtxTable(
   reader: BinaryReader,
   offset: number,
   numGlyphs: number,
-  numOfLongHorMetrics: number
+  numOfLongHorMetrics: number,
 ): HmtxTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
@@ -417,7 +417,7 @@ function readHmtxTable(
 
   invariant(
     hMetrics.length + leftSideBearings.length === numGlyphs,
-    `The number of hMetrics (${hMetrics.length}) plus the number of left side bearings (${leftSideBearings.length}) must equal the number of glyphs (${numGlyphs}).`
+    `The number of hMetrics (${hMetrics.length}) plus the number of left side bearings (${leftSideBearings.length}) must equal the number of glyphs (${numGlyphs}).`,
   );
 
   reader.setPosition(position);
@@ -437,7 +437,7 @@ function readLocaTable(
   reader: BinaryReader,
   offset: number,
   numGlyphs: number,
-  indexToLocFormat: number
+  indexToLocFormat: number,
 ): LocaTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
@@ -457,7 +457,7 @@ function readGlyfTable(
   reader: BinaryReader,
   offset: number,
   loca: LocaTable,
-  indexToLocFormat: number
+  indexToLocFormat: number,
 ): GlyfTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
@@ -485,7 +485,7 @@ function readGlyfTable(
 function readGPOSTable(
   reader: BinaryReader,
   offset: number,
-  debug: boolean
+  debug: boolean,
 ): GPOSTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
@@ -496,7 +496,7 @@ function readGPOSTable(
   invariant(major === 1 && minor === 0, "Only GPOS version 1.0 is supported.");
 
   reader.getUint16(); // scriptListOffset
-  
+
   const featureListOffset = reader.getUint16();
   const lookupListOffset = reader.getUint16();
 
@@ -583,7 +583,7 @@ function readGPOSTable(
     if (lookupType === LookupType.ExtensionPositioning) {
       for (let j = 0; j < subTableCount; j++) {
         reader.setPosition(
-          offset + lookupListOffset + lookupTables[i] + subTableOffsets[j]
+          offset + lookupListOffset + lookupTables[i] + subTableOffsets[j],
         );
 
         const posFormat = reader.getUint16();
@@ -604,7 +604,7 @@ function readGPOSTable(
               const posFormat = reader.getUint16();
               invariant(
                 posFormat === 1 || posFormat === 2,
-                "Invalid posFormat."
+                "Invalid posFormat.",
               );
               extension.posFormat = posFormat;
 
@@ -632,7 +632,7 @@ function readGPOSTable(
                       lookupTables[i] +
                       subTableOffsets[j] +
                       extensionOffset +
-                      pairSetOffsets[k]
+                      pairSetOffsets[k],
                   );
 
                   const pairValueCount = reader.getUint16();
@@ -666,7 +666,7 @@ function readGPOSTable(
                     const coverageFormat = reader.getUint16();
 
                     return parseCoverage(reader, coverageFormat);
-                  }
+                  },
                 );
 
                 extension = {
@@ -694,7 +694,7 @@ function readGPOSTable(
                   () => {
                     const coverageFormat = reader.getUint16();
                     return parseCoverage(reader, coverageFormat);
-                  }
+                  },
                 );
 
                 let classDef1 = reader.runAt(
@@ -706,7 +706,7 @@ function readGPOSTable(
                     classDef1Offset,
                   () => {
                     return parseClassDef(reader);
-                  }
+                  },
                 );
 
                 let classDef2 = reader.runAt(
@@ -718,7 +718,7 @@ function readGPOSTable(
                     classDef2Offset,
                   () => {
                     return parseClassDef(reader);
-                  }
+                  },
                 );
 
                 const classRecords: Array<
@@ -759,12 +759,12 @@ function readGPOSTable(
               } else {
                 if (debug) {
                   console.warn(
-                    "Only Pair Adjustment lookup format 1 and 2 are supported."
+                    "Only Pair Adjustment lookup format 1 and 2 are supported.",
                   );
                 }
               }
             }
-          }
+          },
         );
 
         lookup.subtables.push({
@@ -994,7 +994,7 @@ export type CoverageTableFormat2 = {
  */
 function getValueRecord(
   reader: BinaryReader,
-  valueRecord: number
+  valueRecord: number,
 ): ValueRecord | undefined {
   let result: ValueRecord = {};
 
@@ -1039,7 +1039,7 @@ function getValueRecord(
 
 function parseCoverage(
   reader: BinaryReader,
-  coverageFormat: number
+  coverageFormat: number,
 ): CoverageTableFormat1 | CoverageTableFormat2 {
   if (coverageFormat === 2) {
     const rangeCount = reader.getUint16();

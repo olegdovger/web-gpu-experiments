@@ -7,7 +7,7 @@ export function toSDF(
   imageData: ImageData,
   width: number,
   height: number,
-  radius: number
+  radius: number,
 ): ImageData {
   const gridOuter = new Float64Array(width * height);
   const gridInner = new Float64Array(width * height);
@@ -59,7 +59,7 @@ function edt1d(
   length: number,
   f: Float64Array,
   v: Uint16Array,
-  z: Float64Array
+  z: Float64Array,
 ): void {
   let q: number, k: number, s: number, r: number;
 
@@ -99,7 +99,7 @@ function edt(
   height: number,
   f: Float64Array,
   v: Uint16Array,
-  z: Float64Array
+  z: Float64Array,
 ): void {
   for (let x = 0; x < width; x++) {
     edt1d(data, x, width, height, f, v, z);

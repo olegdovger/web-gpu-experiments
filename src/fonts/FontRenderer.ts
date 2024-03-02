@@ -15,32 +15,11 @@ interface FontRendererProps {
   colorTextureView: GPUTextureView;
   width: number;
   height: number;
-}
-interface BaseFontRenderer {
-  setFont: (lookups: Lookups, fontAtlasTexture: GPUTexture) => void;
-  text: (text: string, position: Vec2, fontSize: number, color: Vec4) => void;
-  render: () => void;
+  clearValue: GPUColorDict;
+  fontColorValue: GPUColorDict;
 }
 
-export class EmptyFontRenderer implements BaseFontRenderer {
-  text(_text: string, _position: Vec2, _fontSize: number, _color: Vec4) {
-    console.warn(
-      "Method 'text' not implemented. You might forget to use 'fontSource'"
-    );
-  }
-  render() {
-    console.warn(
-      "Method 'render' Not implemented. You might forget to use 'fontSource'"
-    );
-  }
-  setFont(_lookups: Lookups, _fontAtlasTexture: GPUTexture) {
-    console.warn(
-      "Method 'setFont' Not implemented. You might forget to use 'fontSource'"
-    );
-  }
-}
-
-export class FontRenderer extends EmptyFontRenderer {
+export class FontRenderer {
   glyphData: Float32Array = new Float32Array(TEXT_BUFFER_SIZE);
   glyphCount: number = 0;
 
@@ -56,19 +35,29 @@ export class FontRenderer extends EmptyFontRenderer {
   device: GPUDevice;
   context: GPUCanvasContext;
   colorTextureView: GPUTextureView;
+  clearValue: GPUColorDict;
+  fontColorValue: GPUColorDict;
   width: number;
   height: number;
 
   constructor(props: FontRendererProps) {
-    super();
-
-    const { device, context, colorTextureView, width, height } = props;
+    const {
+      device,
+      context,
+      colorTextureView,
+      width,
+      height,
+      clearValue,
+      fontColorValue,
+    } = props;
 
     this.device = device;
     this.colorTextureView = colorTextureView;
     this.context = context;
     this.width = width;
     this.height = height;
+    this.clearValue = clearValue;
+    this.fontColorValue = fontColorValue;
 
     const textModule = device.createShaderModule({ code: shaderCode });
 
@@ -191,28 +180,36 @@ export class FontRenderer extends EmptyFontRenderer {
     });
   }
 
-  text(text: string, position: Vec2, fontSize: number, color: Vec4): void {
+  text(text: string, position: Vec2, fontSize: number, color?: Vec4): void {
     invariant(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
     let totalSizeWidth = 0;
 
     for (let i = 0; i < shape.positions.length; i++) {
-      let shapePosition = shape.positions[i].add(position);
-      let size = shape.sizes[i];
+      const shapePosition = shape.positions[i].add(position);
+      const size = shape.sizes[i];
 
-      let uv = this.fontLookups.uvs.get(text[i].charCodeAt(0));
+      const uv = this.fontLookups.uvs.get(text[i].charCodeAt(0));
       invariant(uv, "UV does not exist.");
+
+      const colorRed = color?.x ?? this.fontColorValue?.r;
+      const colorGreen = color?.y ?? this.fontColorValue?.g;
+      const colorBlue = color?.z ?? this.fontColorValue?.b;
+      const colorOpacity = color?.w ?? this.fontColorValue?.a;
 
       const struct = 16;
       this.glyphData[this.glyphCount * struct + 0] = shapePosition.x;
       this.glyphData[this.glyphCount * struct + 1] = shapePosition.y;
       this.glyphData[this.glyphCount * struct + 2] = 0;
       this.glyphData[this.glyphCount * struct + 3] = fontSize;
-      this.glyphData[this.glyphCount * struct + 4] = color.x;
-      this.glyphData[this.glyphCount * struct + 5] = color.y;
-      this.glyphData[this.glyphCount * struct + 6] = color.z;
-      this.glyphData[this.glyphCount * struct + 7] = color.w;
+
+      // text color
+      this.glyphData[this.glyphCount * struct + 4] = colorRed;
+      this.glyphData[this.glyphCount * struct + 5] = colorGreen;
+      this.glyphData[this.glyphCount * struct + 6] = colorBlue;
+      this.glyphData[this.glyphCount * struct + 7] = colorOpacity;
+
       this.glyphData[this.glyphCount * struct + 8] = size.x;
       this.glyphData[this.glyphCount * struct + 9] = size.y;
       this.glyphData[this.glyphCount * struct + 10] = uv.x;
@@ -242,7 +239,7 @@ export class FontRenderer extends EmptyFontRenderer {
             .getCurrentTexture()
             .createView({ label: "antialiased resolve target" }),
           // This is background color.
-          clearValue: { r: 1, g: 1, b: 1, a: 1 },
+          clearValue: this.clearValue,
           loadOp: "clear",
           storeOp: "store",
         },

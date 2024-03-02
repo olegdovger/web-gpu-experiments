@@ -1,17 +1,11 @@
-import WebGPUEngine, { RenderFn } from "./WebGPUEngine.ts";
-
-export interface ChartSettings {
-  debug?: boolean;
-  log?: boolean;
-  fontSource?: string;
-  debounceInterval?: number;
-}
+import commonSettings from "../common.settings.ts";
+import WebGPUEngine, { EngineSettings, RenderFn } from "./WebGPUEngine.ts";
 
 class Chart {
   private engine: WebGPUEngine;
-  private settings: ChartSettings;
+  private settings: EngineSettings;
 
-  constructor(element: HTMLElement | null, settings?: ChartSettings) {
+  constructor(element: HTMLElement | null, settings?: EngineSettings) {
     const canvas = document.createElement("canvas");
 
     if (!element) throw new Error("No element provided");
@@ -21,11 +15,11 @@ class Chart {
     element.style.width = "100%";
     element.style.height = "100%";
 
-    this.settings = settings ?? { debug: true, log: true };
+    this.settings = settings ?? commonSettings;
 
     this.log("initialize");
 
-    this.engine = new WebGPUEngine(canvas, settings);
+    this.engine = new WebGPUEngine(canvas, this.settings);
   }
 
   private log(...args: any[]) {
