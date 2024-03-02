@@ -1,4 +1,4 @@
-import type {Block} from "./types.ts";
+import type { Block } from "./types.ts";
 
 class LayoutManager {
   private blocks: Block[];
@@ -15,12 +15,10 @@ class LayoutManager {
     const width = this.width;
     const height = this.height;
 
-    console.debug('Rendering', this.blocks.length, 'blocks');
-    console.debug('Width:', width, ', height:', height);
+    console.debug("Rendering", this.blocks.length, "blocks");
+    console.debug("Width:", width, ", height:", height);
 
-    for (let i = 0; i < this.blocks.length; i++) {
-
-    }
+    for (let i = 0; i < this.blocks.length; i++) {}
   }
 }
 

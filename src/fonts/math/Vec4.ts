@@ -8,7 +8,7 @@ export class Vec4 {
     public readonly x: number,
     public readonly y: number,
     public readonly z: number,
-    public readonly w: number
+    public readonly w: number,
   ) {}
 
   add(other: Vec4): Vec4 {
@@ -16,7 +16,7 @@ export class Vec4 {
       this.x + other.x,
       this.y + other.y,
       this.z + other.z,
-      this.w + other.w
+      this.w + other.w,
     );
   }
 
@@ -25,13 +25,13 @@ export class Vec4 {
       this.x - other.x,
       this.y - other.y,
       this.z - other.z,
-      this.w - other.w
+      this.w - other.w,
     );
   }
 
   length(): number {
     return Math.sqrt(
-      this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w
+      this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w,
     );
   }
 
@@ -41,7 +41,7 @@ export class Vec4 {
       this.x / length,
       this.y / length,
       this.z / length,
-      this.w / length
+      this.w / length,
     );
   }
 
@@ -50,7 +50,7 @@ export class Vec4 {
       this.x * scalar,
       this.y * scalar,
       this.z * scalar,
-      this.w * scalar
+      this.w * scalar,
     );
   }
 
@@ -59,7 +59,7 @@ export class Vec4 {
       this.y * other.z - this.z * other.y,
       this.z * other.x - this.x * other.z,
       this.x * other.y - this.y * other.x,
-      0
+      0,
     );
   }
 

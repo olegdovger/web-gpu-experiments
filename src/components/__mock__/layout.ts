@@ -1,4 +1,4 @@
-import {Layout} from "../LayoutManager/types.ts";
+import { Layout } from "../LayoutManager/types.ts";
 
 const layout: Layout = {
   type: "vertical",
@@ -23,10 +23,10 @@ const layout: Layout = {
           {
             height: "full",
             width: 50,
-          }
-        ]
-      }
-    }
+          },
+        ],
+      },
+    },
   ],
 };
 

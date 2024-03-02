@@ -14,7 +14,7 @@ export const ENABLE_KERNING = true;
 export function getTextShape(
   lookups: Lookups,
   text: string,
-  fontSize: number
+  fontSize: number,
 ): Shape {
   const positions: Vec2[] = [];
   const sizes: Vec2[] = [];
@@ -28,7 +28,7 @@ export function getTextShape(
     const glyph = lookups.glyphs.get(character);
     invariant(
       glyph,
-      `\nGlyph not found for character ${text[i]}\n  character position: ${i}\n  text: "${text}"`
+      `\nGlyph not found for character ${text[i]}\n  character position: ${i}\n  text: "${text}"`,
     );
 
     const { y, width, height, lsb, rsb } = glyph;
@@ -41,13 +41,13 @@ export function getTextShape(
     positions.push(
       new Vec2(
         positionX + (lsb + kerning) * scale - padding,
-        (lookups.capHeight - y - height) * scale - padding
-      )
+        (lookups.capHeight - y - height) * scale - padding,
+      ),
     );
 
     // 2 * padding is to account for padding from both sides of the glyph.
     sizes.push(
-      new Vec2(width * scale + padding * 2, height * scale + padding * 2)
+      new Vec2(width * scale + padding * 2, height * scale + padding * 2),
     );
     positionX += (lsb + kerning + width + rsb) * scale;
   }

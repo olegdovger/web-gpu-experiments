@@ -1,5 +1,6 @@
-import { EmptyFontRenderer, FontRenderer } from "../../fonts/FontRenderer";
+import { FontRenderer } from "../../fonts/FontRenderer";
 import createFontTexture from "../../fonts/createFontTexture";
+import { invariant } from "../../fonts/invariant";
 import { TTF, parseTTF } from "../../fonts/parseTTF";
 import { Lookups, prepareLookups } from "../../fonts/prepareLookups";
 import { renderFontAtlas } from "../../fonts/renderFontAtlas";
@@ -15,6 +16,8 @@ export interface LoadFontSettings {
   width: number;
   height: number;
   debug: boolean;
+  clearValue: GPUColorDict;
+  fontColorValue: GPUColorDict;
 }
 
 const SAMPLE_COUNT = 4;
@@ -26,13 +29,13 @@ let preparedLookups: Lookups;
 
 async function initFontRenderer(
   props: LoadFontProps,
-  settings: LoadFontSettings
-): Promise<FontRenderer | EmptyFontRenderer> {
+  settings: LoadFontSettings,
+): Promise<FontRenderer> {
   const { fontSource, device, canvas, context } = props;
   const { debug } = settings;
 
   const colorTexture = device.createTexture({
-    label: "color",
+    label: "colorTexture",
     size: { width: canvas.width, height: canvas.height },
     sampleCount: SAMPLE_COUNT,
     format: "bgra8unorm",
@@ -46,14 +49,14 @@ async function initFontRenderer(
     colorTextureView,
     width: canvas.width,
     height: canvas.height,
+    clearValue: settings.clearValue,
+    fontColorValue: settings.fontColorValue,
   });
 
-  if (!fontSource) {
-    return new EmptyFontRenderer();
-  }
+  invariant(fontSource, "'fontSource' must be set.");
 
   loadedFontFile ||= await fetch(fontSource).then((result) =>
-    result.arrayBuffer()
+    result.arrayBuffer(),
   );
 
   parsedTTF ||= parseTTF(loadedFontFile, { debug });

@@ -26,7 +26,7 @@ export function prepareLookups(
   ttf: TTF,
   options?: {
     alphabet?: string;
-  }
+  },
 ): Lookups {
   const scale = (1 / ttf.head.unitsPerEm) * ATLAS_FONT_SIZE;
   const glyphs = calculateGlyphQuads(ttf, options?.alphabet);
@@ -36,13 +36,13 @@ export function prepareLookups(
     (g) =>
       new Vec2(
         transform(g.width) + ATLAS_GAP * 2,
-        transform(g.height) + ATLAS_GAP * 2
-      )
+        transform(g.height) + ATLAS_GAP * 2,
+      ),
   );
   const packing = packShelves(sizes);
   invariant(
     packing.positions.length === glyphs.length,
-    `Packing produced different number of positions than expected.`
+    `Packing produced different number of positions than expected.`,
   );
 
   const atlas = {
@@ -63,8 +63,8 @@ export function prepareLookups(
         position.x / atlas.width,
         position.y / atlas.height,
         size.x / atlas.width,
-        size.y / atlas.height
-      )
+        size.y / atlas.height,
+      ),
     );
   }
 
@@ -118,7 +118,7 @@ export function prepareLookups(
                       if (pair.value1?.xAdvance) {
                         glyphKernMap.set(
                           pair.secondGlyph,
-                          pair.value1.xAdvance
+                          pair.value1.xAdvance,
                         );
                       }
                     }
@@ -131,7 +131,7 @@ export function prepareLookups(
                 }
               } else {
                 console.warn(
-                  `Coverage format ${coverage.coverageFormat} is not supported.`
+                  `Coverage format ${coverage.coverageFormat} is not supported.`,
                 );
               }
             } else if (subtable.extension.posFormat === 2) {
@@ -143,7 +143,7 @@ export function prepareLookups(
                 classRecords = subtable.extension.classRecords;
               } else {
                 console.warn(
-                  `Coverage format ${coverage.coverageFormat} is not supported.`
+                  `Coverage format ${coverage.coverageFormat} is not supported.`,
                 );
               }
             }
@@ -192,7 +192,7 @@ export function prepareLookups(
 }
 
 function generateGlyphToClassMap(
-  classDef: ClassDefFormat1 | ClassDefFormat2
+  classDef: ClassDefFormat1 | ClassDefFormat2,
 ): Map<number, number> {
   const glyphToClass = new Map<number, number>();
 

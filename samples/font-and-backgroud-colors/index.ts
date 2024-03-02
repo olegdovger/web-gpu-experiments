@@ -5,7 +5,10 @@ import commonSettings from "../../src/common.settings";
 
 const chart = new Chart(document.getElementById("chart"), {
   ...commonSettings,
-  fontSource: "/fonts/Inter.ttf",
+  log: true,
+  fontSource: "/fonts/JetBrainsMono-Regular.ttf",
+  clearValue: { r: 0, g: 0, b: 0.5, a: 1 },
+  fontColorValue: { r: 1, g: 0.5, b: 1, a: 1 },
 });
 
 chart.render(({ font }) => {
@@ -13,11 +16,10 @@ chart.render(({ font }) => {
     "The quick brown fox jumps over the lazy dog",
     new Vec2(16, 16),
     16,
-    new Vec4(0, 0, 0, 1),
   );
 
   font.text(
-    ". ‥ … → ← ↑ ↓ Å Ä Ö Ë Ü Ï Ÿ å ä ö ë ü ï ÿ Ø ø •",
+    ". … → ← ↑ ↓ Å Ä Ö Ë Ü Ï Ÿ å ä ö ë ü ï ÿ Ø ø •",
     new Vec2(16, 32 + 10 /* offset */),
     16,
     new Vec4(0.5, 0.5, 0.5, 1),

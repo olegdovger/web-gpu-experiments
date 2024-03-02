@@ -37,18 +37,18 @@ export function calculateGlyphQuads(ttf: TTF, alphabet?: string): Glyph[] {
     invariant(
       index,
       `Couldn't find index for character '${String.fromCharCode(
-        code
-      )}' in glyphIndexMap.`
+        code,
+      )}' in glyphIndexMap.`,
     );
     invariant(
       index < ttf.glyf.length,
-      "Index is out of bounds for glyf table."
+      "Index is out of bounds for glyf table.",
     );
 
     const lastMetric = ttf.hmtx.hMetrics.at(-1);
     invariant(
       lastMetric,
-      "The last advance is missing, which means that hmtx table is probably empty."
+      "The last advance is missing, which means that hmtx table is probably empty.",
     );
 
     const hmtx =

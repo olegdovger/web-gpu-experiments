@@ -86,7 +86,7 @@ export function packShelves(sizes: Vec2[]): Packing {
     width: size,
     height: size,
     positions: rectangles.map(
-      (rectangle) => new Vec2(rectangle.x, rectangle.y)
+      (rectangle) => new Vec2(rectangle.x, rectangle.y),
     ),
   };
 }

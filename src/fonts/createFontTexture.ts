@@ -14,7 +14,7 @@ async function createFontTexture(device: GPUDevice, imageBitmap: ImageBitmap) {
   device.queue.copyExternalImageToTexture(
     { source: imageBitmap },
     { texture },
-    size
+    size,
   );
 
   return texture;
