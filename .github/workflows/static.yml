@@ -56,7 +56,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm run build
+        run: pnpm run build --outDir=web-gpu-experiments
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
