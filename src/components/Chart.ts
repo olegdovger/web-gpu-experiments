@@ -22,13 +22,13 @@ class Chart {
     this.engine = new WebGPUEngine(canvas, this.settings);
   }
 
-  private log(...args: any[]) {
+  private log(...args: unknown[]) {
     if (!this.settings?.log) return;
 
     console.log("Chart:", ...args);
   }
 
-  private error(...args: any[]) {
+  private error(...args: unknown[]) {
     console.error("Chart:", ...args);
   }
 

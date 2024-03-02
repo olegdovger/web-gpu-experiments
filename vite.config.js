@@ -2,7 +2,7 @@ import fs from "fs";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 
-const directoryPath = "samples";
+const directoryPath = "./samples";
 
 const inputSamples = {};
 
@@ -28,4 +28,5 @@ export default defineConfig({
       },
     },
   },
+  base: "web-gpu-experiments",
 });
