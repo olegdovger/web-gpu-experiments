@@ -7,7 +7,7 @@ const commonSettings: EngineSettings = {
   debounceInterval: 1000,
   clearValue: clearValue,
   fontColorValue: fontColorValue,
-  fontSource: "/fonts/JetBrainsMono-Regular.ttf",
+  fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Regular.ttf",
 };
 
 export default commonSettings;
