@@ -14,11 +14,16 @@ try {
   files.forEach((folder) => {
     const dir = resolve(__dirname, `${directoryPath}/${folder}/`);
 
-    inputSamples[folder] = `${dir}/index.html`;
+    if (fs.existsSync(`${dir}/index.html`)) {
+      inputSamples[folder] = `${dir}/index.html`;
 
-    const build_dir = resolve(__dirname, `${base}/samples/${folder}/`);
+      const build_dir = resolve(__dirname, `${base}/samples/${folder}/`);
 
-    copyTargets.push({ src: "public/fonts/**/*", dest: `${build_dir}/fonts/` });
+      copyTargets.push({
+        src: "public/fonts/**/*",
+        dest: `${build_dir}/fonts/`,
+      });
+    }
   });
 } catch (error) {
   console.error("Error reading directory:", error);
@@ -28,7 +33,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
+        main: resolve(__dirname, "docs/index.html"),
+        search: resolve(__dirname, "docs/search.html"),
         ...inputSamples,
       },
     },

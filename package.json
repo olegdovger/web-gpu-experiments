@@ -10,9 +10,10 @@
     "node": ">=18.15.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port=5173 & open http://localhost:5173/web-gpu-experiments/docs/",
     "build": "tsc && vite build",
-    "preview": "vite preview",
+    "static-serve": "npx http-server -p 8080 . & open http://localhost:8080/web-gpu-experiments/docs/",
+    "start": "pnpm run build && pnpm run static-serve",
     "prepare": "husky",
     "fmt": "./node_modules/.bin/prettier . --write"
   },

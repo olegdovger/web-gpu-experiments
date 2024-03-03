@@ -7,7 +7,7 @@ const chart = new Chart(document.getElementById("chart"), {
   ...commonSettings,
   log: true,
   fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Regular.ttf",
-  clearValue: { r: 0, g: 0, b: 0.5, a: 1 },
+  clearValue: { r: 0.25, g: 0, b: 0.5, a: 1 },
   fontColorValue: { r: 1, g: 0.5, b: 1, a: 1 },
 });
 
