@@ -1,1 +1,0 @@
-function o({vertices1DArray:f,device:e,shaderLocation:a}){const t=new Float32Array(f),r=e.createBuffer({label:"makeVertexBuffer: vertex buffer",size:t.byteLength,usage:GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST});return e.queue.writeBuffer(r,0,t),{buffer:r,layout:{arrayStride:8,attributes:[{shaderLocation:a,offset:0,format:"float32x2"}],stepMode:"vertex"}}}export{o as m};

@@ -1,1 +1,0 @@
-function u({vertices1DArray:t,device:e}){const r=new Float32Array(t),f=e.createBuffer({label:"makeVertexBuffer: vertex buffer",size:r.byteLength,usage:GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST});return e.queue.writeBuffer(f,0,r),f}export{u as m};
