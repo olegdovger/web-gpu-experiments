@@ -5,7 +5,7 @@ import commonSettings from "../../src/common.settings";
 
 const chart = new Chart(document.getElementById("chart"), {
   ...commonSettings,
-  fontSource: "./fonts/JetBrainsMono-Bold.ttf",
+  fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Bold.ttf",
 });
 
 chart.render(({ font }) => {

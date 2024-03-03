@@ -20,9 +20,6 @@ devDependencies:
   eslint:
     specifier: ^8.57.0
     version: 8.57.0
-  gl-matrix:
-    specifier: ^3.4.3
-    version: 3.4.3
   husky:
     specifier: ^9.0.11
     version: 9.0.11
@@ -2016,13 +2013,6 @@ packages:
         integrity: sha512-VaUJspBffn/LMCJVoMvSAdmscJyS1auj5Zulnn5UoYcY531UWmdwhRWkcGKnGU93m5HSXP9LP2usOryrBtQowA==,
       }
     engines: { node: ">=16" }
-    dev: true
-
-  /gl-matrix@3.4.3:
-    resolution:
-      {
-        integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==,
-      }
     dev: true
 
   /glob-parent@5.1.2:

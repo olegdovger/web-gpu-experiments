@@ -4,7 +4,7 @@ import { resolve } from "path";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 
 const directoryPath = "./samples";
-const base = process.env.NODE_ENV === "production" ? "web-gpu-experiments" : "";
+const base = "web-gpu-experiments";
 const inputSamples = {};
 const copyTargets = [];
 
