@@ -6,6 +6,9 @@
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
   },
+  "engines": {
+    "node": ">=18.15.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -19,7 +22,6 @@
     "@typescript-eslint/parser": "^7.1.0",
     "@webgpu/types": "^0.1.40",
     "eslint": "^8.57.0",
-    "gl-matrix": "^3.4.3",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "github:prettier/prettier",
