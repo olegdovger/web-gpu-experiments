@@ -5,12 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=2.0" />
     <title>High performance chart</title>
-    <link rel="stylesheet" href="../../public/styles/index.css" />
+    <link rel="stylesheet" href="../public/styles/search.css" />
   </head>
   <body>
-    <div class="chart-example">
-      <div class="chart" id="chart"></div>
+    <div class="search-bar">
+      <form action="/search" method="get">
+        <input type="search" name="query" placeholder="Search here..." />
+        <button type="submit">Search</button>
+      </form>
     </div>
-    <script type="module" src="./index.ts"></script>
   </body>
 </html>
