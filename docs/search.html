@@ -5,14 +5,88 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=2.0" />
     <title>High performance chart</title>
-    <link rel="stylesheet" href="../public/styles/search.css" />
+    <link rel="stylesheet" href="../public/styles/search/props.easing.css" />
+    <link rel="stylesheet" href="../public/styles/search/theme-toggle.css" />
+    <link rel="stylesheet" href="../public/styles/search/search.css" />
   </head>
   <body>
-    <div class="search-bar">
-      <form action="/search" method="get">
-        <input type="search" name="query" placeholder="Search here..." />
-        <button type="submit">Search</button>
-      </form>
+    <div
+      class="theme-toggle"
+      id="theme-toggle"
+      title="Toggles light & dark"
+      aria-label="auto"
+      aria-live="polite"
+    >
+      <svg
+        class="sun-and-moon"
+        aria-hidden="true"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <mask class="moon" id="moon-mask">
+          <rect x="0" y="0" width="100%" height="100%" fill="white" />
+          <circle cx="24" cy="10" r="6" fill="black" />
+        </mask>
+        <circle
+          class="sun"
+          cx="12"
+          cy="12"
+          r="6"
+          mask="url(#moon-mask)"
+          fill="currentColor"
+        />
+        <g class="sun-beams" stroke="currentColor">
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </g>
+      </svg>
     </div>
+
+    <div class="search-button">
+      <span
+        class="button outline-like"
+        tabindex="1"
+        id="searchButton"
+        onclick="searchBar.showModal()"
+      >
+        <img src="/icons/search.svg" alt="search" />
+      </span>
+    </div>
+
+    <dialog id="searchBar" class="dialog">
+      <div class="dialog-column">
+        <div class="dialog-row">
+          <span class="button">
+            <img src="/icons/leading.svg" alt="leading" />
+          </span>
+          <form class="search-form" method="dialog" id="searchForm">
+            <input
+              type="search"
+              placeholder="Search..."
+              tabindex="0"
+              id="searchInput"
+            />
+            <button type="submit">
+              <span class="button">
+                <img src="/icons/search.svg" alt="search" />
+              </span>
+            </button>
+          </form>
+        </div>
+        <div class="search-item" data-search="font">Font</div>
+        <div class="search-item" data-search="primitive">Primitive</div>
+      </div>
+    </dialog>
+
+    <script type="module" src="./search/toggle-search.ts"></script>
+    <script type="module" src="./search/theme-toggle.ts"></script>
+    <script type="module" src="./search/find-elements.ts"></script>
   </body>
 </html>
