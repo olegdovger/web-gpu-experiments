@@ -1,0 +1,153 @@
+@font-face {
+  font-family: "JetBrainsMono"; /*a name to be used later*/
+  src: url("/web-gpu-experiments/fonts/JetBrainsMono-Regular.ttf"); /*URL to font*/
+}
+
+/* Light theme */
+html,
+html[data-theme="light"] {
+  color-scheme: light;
+  --color-surface-0: white;
+  --main-color: rgb(35, 169, 124);
+}
+
+/* Dark theme override */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --color-surface-0: black;
+  --main-color: rgb(61, 202, 155);
+}
+/* Dark theme (system preference) */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    color-scheme: dark;
+    --color-surface-0: black;
+    --main-color: rgb(61, 202, 155);
+  }
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: JetBrainsMono;
+  font-size: 14px;
+  background-color: var(--color-surface-0);
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+dialog {
+  background-color: transparent;
+  border: none;
+
+  outline: none;
+
+  margin-top: 2rem;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  justify-content: center;
+  align-items: start;
+}
+
+dialog[open] {
+  display: flex;
+}
+
+dialog::backdrop {
+  background-color: transparent;
+}
+
+dialog-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialog-row {
+  width: 35rem;
+  height: 3.5rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--color-surface-0);
+  border-radius: 1.75rem;
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+}
+
+.search-button {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10000;
+}
+
+.outline-like {
+  outline-color: var(--main-color);
+}
+
+.button {
+  width: 3rem;
+  min-width: 3rem;
+  height: 3rem;
+  min-height: 3rem;
+
+  display: flex;
+
+  border-radius: 1.75rem;
+
+  cursor: pointer;
+
+  border: none;
+  background-color: transparent;
+}
+
+.button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.button:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.button img {
+  width: 100%;
+  height: 100%;
+}
+
+.search-form {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  gap: 0.25rem;
+
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-form input[type="search"] {
+  font-family: JetBrainsMono;
+  padding: 0.65rem;
+  border-radius: 1.5rem;
+  border: 0.16px solid #ccc;
+  width: 100%;
+  box-sizing: border-box; /* Include padding in width calculation */
+  outline-color: rgb(35, 169, 124);
+}
+
+button {
+  display: contents;
+}

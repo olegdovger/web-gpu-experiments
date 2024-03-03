@@ -13,7 +13,7 @@
     "dev": "vite --port=5173 & open http://localhost:5173/web-gpu-experiments/docs/",
     "build": "tsc && vite build",
     "static-serve": "npx http-server -p 8080 . & open http://localhost:8080/web-gpu-experiments/docs/",
-    "start": "pnpm run build && pnpm run static-serve",
+    "start": "pnpm run build --outDir=web-gpu-experiments && pnpm run static-serve",
     "prepare": "husky",
     "fmt": "./node_modules/.bin/prettier . --write"
   },
