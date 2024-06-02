@@ -7,7 +7,7 @@ import shaderCodePlain from "./shader.plain.wgsl?raw";
 const chart = new Chart(document.getElementById("chart"), commonSettings);
 
 chart.render(({ device, context }) => {
-  renderPass(device, context, (passEncoder) => {
+  renderPass(device, context, async (passEncoder) => {
     const pipeline = createPipeline({ device, code: shaderCodePlain });
 
     passEncoder.setPipeline(pipeline);

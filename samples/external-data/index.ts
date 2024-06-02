@@ -8,7 +8,7 @@ import commonSettings from "../../src/common.settings.ts";
 const chart = new Chart(document.getElementById("chart"), commonSettings);
 
 chart.render(({ device, context }) => {
-  renderPass(device, context, (passEncoder) => {
+  renderPass(device, context, async (passEncoder) => {
     const points = [
       0.0, 0.95, 0.587785, 0.809017, 0.951057, 0.309017, 0.951057, -0.309017,
       0.587785, -0.809017, 0.0, -0.95, -0.587785, -0.809017, -0.951057,
