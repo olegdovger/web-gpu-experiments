@@ -12,7 +12,7 @@ struct VertexOutput {
 
 struct Glyph {
   position: vec2f,
-  _unused: f32,
+  _positionY: f32,
   fontSize: f32,
   color: vec4f,
   size: vec2f,
@@ -35,20 +35,24 @@ fn vertexMain(input: VertexInput) -> VertexOutput {
     let g = text.glyphs[input.instance];
     let vertex = mix(g.position.xy, g.position.xy + g.size, input.position);
 
-    output.position = vec4f(vertex / g.window * 2 - 1, 0, 1);
-    output.position.y = -output.position.y;
-    output.vertex = vertex;
-    output.uv = mix(g.uv, g.uv + g.uvSize, input.position);
+    output.position = vec4f(((vertex / g.window) / .5), 0, 1);
+    output.position.x = output.position.x - 1.0;
+    output.position.y = -(output.position.y + 1.0 - (g.fontSize / g.window.y) / .5) + (g._positionY / .5 / g.window.y) / .5;
+
     output.instance = input.instance;
+    output.vertex.x = vertex.x;
+    output.vertex.y = vertex.y;
+    output.uv = mix(g.uv, g.uv + g.uvSize, input.position);
+
     return output;
 }
 
 override devicePixelRatio: f32 = 2.0;
 
 @fragment
-fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
-    let g = text.glyphs[input.instance];
-    let distance = textureSample(fontAtlas, fontAtlasSampler, input.uv).a;
+fn fragmentMain(output: VertexOutput) -> @location(0) vec4f {
+    let g = text.glyphs[output.instance];
+    let distance = textureSample(fontAtlas, fontAtlasSampler, output.uv).a;
 
     var width = mix(0.4, 0.1, clamp(g.fontSize, 0, 40) / 40.0);
     width /= devicePixelRatio;

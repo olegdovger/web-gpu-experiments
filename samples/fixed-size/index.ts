@@ -42,9 +42,7 @@ chart.render(({ device, context, width, height }) => {
     });
 
     passEncoder.setPipeline(pipeline);
-
     passEncoder.setVertexBuffer(0, pointsLineBuffer);
-
     passEncoder.draw(points.length / 2);
 
     passEncoder.end();

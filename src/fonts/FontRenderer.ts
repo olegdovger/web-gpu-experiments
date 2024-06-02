@@ -2,7 +2,7 @@ import { invariant } from "./invariant";
 import { Vec2 } from "./math/Vec2";
 import { Vec4 } from "./math/Vec4";
 import { Lookups } from "./prepareLookups";
-import { getTextShape } from "./shapeText";
+import { getTextShape, Shape } from "./shapeText";
 import shaderCode from "./shaders/text.shader.wgsl?raw";
 
 const TEXT_BUFFER_SIZE = 16 * 1000;
@@ -17,6 +17,12 @@ interface FontRendererProps {
   height: number;
   clearValue: GPUColorDict;
   fontColorValue: GPUColorDict;
+}
+
+interface TextShape {
+  bounds: Shape["boundingRectangle"];
+  position: Vec2;
+  fontSize: number;
 }
 
 export class FontRenderer {
@@ -180,7 +186,12 @@ export class FontRenderer {
     });
   }
 
-  text(text: string, position: Vec2, fontSize: number, color?: Vec4): void {
+  text(
+    text: string,
+    position: Vec2,
+    fontSize: number,
+    color?: Vec4,
+  ): TextShape {
     invariant(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
@@ -197,30 +208,40 @@ export class FontRenderer {
       const colorOpacity = color?.w ?? this.fontColorValue?.a;
 
       const struct = 16;
-      this.glyphData[this.glyphCount * struct + 0] = shapePosition.x;
-      this.glyphData[this.glyphCount * struct + 1] = shapePosition.y;
-      this.glyphData[this.glyphCount * struct + 2] = 0;
-      this.glyphData[this.glyphCount * struct + 3] = fontSize;
+      const startPosition = this.glyphCount * struct;
 
-      // text color
-      this.glyphData[this.glyphCount * struct + 4] = colorRed;
-      this.glyphData[this.glyphCount * struct + 5] = colorGreen;
-      this.glyphData[this.glyphCount * struct + 6] = colorBlue;
-      this.glyphData[this.glyphCount * struct + 7] = colorOpacity;
+      // text char position
+      this.glyphData[startPosition] = shapePosition.x;
+      this.glyphData[startPosition + 1] = shapePosition.y;
+      this.glyphData[startPosition + 2] = position.y;
+      this.glyphData[startPosition + 3] = fontSize;
 
-      this.glyphData[this.glyphCount * struct + 8] = size.x;
-      this.glyphData[this.glyphCount * struct + 9] = size.y;
-      this.glyphData[this.glyphCount * struct + 10] = uv.x;
-      this.glyphData[this.glyphCount * struct + 11] = uv.y;
-      this.glyphData[this.glyphCount * struct + 12] = uv.z;
-      this.glyphData[this.glyphCount * struct + 13] = uv.w;
-      this.glyphData[this.glyphCount * struct + 14] =
-        this.width / window.devicePixelRatio;
-      this.glyphData[this.glyphCount * struct + 15] =
-        this.height / window.devicePixelRatio;
+      // text char color
+      this.glyphData[startPosition + 4] = colorRed;
+      this.glyphData[startPosition + 5] = colorGreen;
+      this.glyphData[startPosition + 6] = colorBlue;
+      this.glyphData[startPosition + 7] = colorOpacity;
+
+      const pixelRatioWidth = this.width / window.devicePixelRatio;
+      const pixelRatioHeight = this.height / window.devicePixelRatio;
+      // text char size
+      this.glyphData[startPosition + 8] = size.x;
+      this.glyphData[startPosition + 9] = size.y;
+      this.glyphData[startPosition + 10] = uv.x;
+      this.glyphData[startPosition + 11] = uv.y;
+      this.glyphData[startPosition + 12] = uv.z;
+      this.glyphData[startPosition + 13] = uv.w;
+      this.glyphData[startPosition + 14] = pixelRatioWidth;
+      this.glyphData[startPosition + 15] = pixelRatioHeight;
 
       this.glyphCount += 1;
     }
+
+    return {
+      bounds: shape.boundingRectangle,
+      position,
+      fontSize,
+    };
   }
 
   render(): void {
