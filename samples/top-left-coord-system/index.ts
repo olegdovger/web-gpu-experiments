@@ -10,7 +10,7 @@ import commonSettings from "../../src/common.settings.ts";
 const chart = new Chart(document.getElementById("chart"), commonSettings);
 
 chart.render(({ device, context }) => {
-  renderPass(device, context, (passEncoder) => {
+  renderPass(device, context, async (passEncoder) => {
     const points = [0.05, 0.05, 0.95, 0.05, 0.95, 0.95, 0.05, 0.05];
 
     const { buffer, layout: _layout } = makeVertexBufferAndLayout({
