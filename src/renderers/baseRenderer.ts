@@ -1,9 +1,12 @@
 import { clearValue } from "../constants";
 
-export function renderPass(
+export async function renderPass(
   device: GPUDevice,
   context: GPUCanvasContext,
-  execute: (passEncoder: GPURenderPassEncoder) => void,
+  execute: (
+    passEncoder: GPURenderPassEncoder,
+    commandEncoder: GPUCommandEncoder,
+  ) => Promise<void>,
 ) {
   const view = context.getCurrentTexture().createView();
 
@@ -24,7 +27,7 @@ export function renderPass(
   const passEncoder: GPURenderPassEncoder =
     commandEncoder.beginRenderPass(renderPassDescriptor);
 
-  execute(passEncoder);
+  await execute(passEncoder, commandEncoder);
 
   device.queue.submit([commandEncoder.finish()]);
 }
