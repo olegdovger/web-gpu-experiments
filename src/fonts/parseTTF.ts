@@ -1,12 +1,5 @@
-import { invariant } from "./invariant";
-import {
-  BinaryReader,
-  Fixed,
-  FWord,
-  Int16,
-  Uint16,
-  Uint32,
-} from "./BinaryReader";
+import { invariant } from "../utils/invariant.ts";
+import { BinaryReader, Fixed, FWord, Int16, Uint16, Uint32 } from "./BinaryReader";
 
 interface ParseSettings {
   debug: boolean;
@@ -42,20 +35,13 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
 
     if (tag !== "head") {
       const calculated = calculateChecksum(
-        reader.getDataSlice(
-          tables[tag].offset,
-          4 * Math.ceil(tables[tag].length / 4),
-        ),
+        reader.getDataSlice(tables[tag].offset, 4 * Math.ceil(tables[tag].length / 4)),
       );
-      invariant(
-        calculated === tables[tag].checksum,
-        `Checksum for table ${tag} is invalid.`,
-      );
+      invariant(calculated === tables[tag].checksum, `Checksum for table ${tag} is invalid.`);
     }
   }
 
-  const shared =
-    "table is missing. Please use other font variant that contains it.";
+  const shared = "table is missing. Please use other font variant that contains it.";
 
   invariant(tables["head"].offset, `head ${shared}`);
   ttf.head = readHeadTable(reader, tables["head"].offset);
@@ -70,28 +56,13 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
   ttf.hhea = readHheaTable(reader, tables["hhea"].offset);
 
   invariant(tables["hmtx"].offset, `hmtx ${shared}`);
-  ttf.hmtx = readHmtxTable(
-    reader,
-    tables["hmtx"].offset,
-    ttf.maxp?.numGlyphs,
-    ttf.hhea?.numberOfHMetrics,
-  );
+  ttf.hmtx = readHmtxTable(reader, tables["hmtx"].offset, ttf.maxp?.numGlyphs, ttf.hhea?.numberOfHMetrics);
 
   invariant(tables["loca"].offset, `loca ${shared}`);
-  ttf.loca = readLocaTable(
-    reader,
-    tables["loca"].offset,
-    ttf.maxp?.numGlyphs,
-    ttf.head?.indexToLocFormat,
-  );
+  ttf.loca = readLocaTable(reader, tables["loca"].offset, ttf.maxp?.numGlyphs, ttf.head?.indexToLocFormat);
 
   invariant(tables["glyf"].offset, `glyf ${shared}`);
-  ttf.glyf = readGlyfTable(
-    reader,
-    tables["glyf"].offset,
-    ttf.loca,
-    ttf.head?.indexToLocFormat,
-  );
+  ttf.glyf = readGlyfTable(reader, tables["glyf"].offset, ttf.loca, ttf.head?.indexToLocFormat);
 
   if (tables["GPOS"]) {
     ttf.GPOS = readGPOSTable(reader, tables["GPOS"].offset, debug);
@@ -105,18 +76,11 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
  */
 function calculateChecksum(data: Uint8Array): number {
   const nlongs = data.length / 4;
-  invariant(
-    nlongs === Math.floor(nlongs),
-    "Data length must be divisible by 4.",
-  );
+  invariant(nlongs === Math.floor(nlongs), "Data length must be divisible by 4.");
 
   let sum = 0;
   for (let i = 0; i < nlongs; i++) {
-    const int32 =
-      (data[i * 4] << 24) +
-      (data[i * 4 + 1] << 16) +
-      (data[i * 4 + 2] << 8) +
-      data[i * 4 + 3];
+    const int32 = (data[i * 4] << 24) + (data[i * 4 + 1] << 16) + (data[i * 4 + 2] << 8) + data[i * 4 + 3];
     const unsigned = int32 >>> 0;
     sum = ((sum + unsigned) & 0xffffffff) >>> 0;
   }
@@ -182,17 +146,11 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
     const offset = reader.getUint32();
     encodingRecords.push({ platformID, encodingID, offset });
 
-    const isWindowsPlatform =
-      platformID === 3 &&
-      (encodingID === 0 || encodingID === 1 || encodingID === 10);
+    const isWindowsPlatform = platformID === 3 && (encodingID === 0 || encodingID === 1 || encodingID === 10);
 
     const isUnicodePlatform =
       platformID === 0 &&
-      (encodingID === 0 ||
-        encodingID === 1 ||
-        encodingID === 2 ||
-        encodingID === 3 ||
-        encodingID === 4);
+      (encodingID === 0 || encodingID === 1 || encodingID === 2 || encodingID === 3 || encodingID === 4);
 
     if (isWindowsPlatform || isUnicodePlatform) {
       selectedOffset = offset;
@@ -202,10 +160,7 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
   invariant(selectedOffset !== null, "No supported cmap table found.");
   const format = reader.getUint16();
 
-  invariant(
-    format === 4,
-    `Unsupported cmap table format. Expected 4, found ${format}.`,
-  );
+  invariant(format === 4, `Unsupported cmap table format. Expected 4, found ${format}.`);
 
   const length = reader.getUint16();
   const language = reader.getUint16();
@@ -253,11 +208,7 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
         const startCodeOffset = (c - startCode) * 2;
         const currentRangeOffset = i * 2; // 2 because the numbers are 2 byte big.
 
-        const glyphIndexOffset =
-          idRangeOffsetsStart +
-          idRangeOffset +
-          currentRangeOffset +
-          startCodeOffset;
+        const glyphIndexOffset = idRangeOffsetsStart + idRangeOffset + currentRangeOffset + startCodeOffset;
 
         reader.setPosition(glyphIndexOffset);
         glyphIndex = reader.getUint16();
@@ -303,14 +254,11 @@ function readMaxpTable(reader: BinaryReader, offset: number): MaxpTable {
   reader.setPosition(offset);
 
   const version = reader.getUint32();
-  const versionString =
-    version === 0x00005000 ? "0.5" : version === 0x00010000 ? "1.0" : null;
+  const versionString = version === 0x00005000 ? "0.5" : version === 0x00010000 ? "1.0" : null;
 
   invariant(
     versionString,
-    `Unsupported maxp table version (expected 0x00005000 or 0x00010000 but found ${version.toString(
-      16,
-    )}).`,
+    `Unsupported maxp table version (expected 0x00005000 or 0x00010000 but found ${version.toString(16)}).`,
   );
   const numGlyphs = reader.getUint16();
 
@@ -433,12 +381,7 @@ function readHmtxTable(
  *
  *  See: [Microsoft docs](https://docs.microsoft.com/en-us/typography/opentype/spec/loca).
  */
-function readLocaTable(
-  reader: BinaryReader,
-  offset: number,
-  numGlyphs: number,
-  indexToLocFormat: number,
-): LocaTable {
+function readLocaTable(reader: BinaryReader, offset: number, numGlyphs: number, indexToLocFormat: number): LocaTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
 
@@ -453,12 +396,7 @@ function readLocaTable(
 /**
  * See: [Microsoft docs](https://docs.microsoft.com/en-us/typography/opentype/spec/glyf).
  */
-function readGlyfTable(
-  reader: BinaryReader,
-  offset: number,
-  loca: LocaTable,
-  indexToLocFormat: number,
-): GlyfTable {
+function readGlyfTable(reader: BinaryReader, offset: number, loca: LocaTable, indexToLocFormat: number): GlyfTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
 
@@ -482,11 +420,7 @@ function readGlyfTable(
   return glyfs;
 }
 
-function readGPOSTable(
-  reader: BinaryReader,
-  offset: number,
-  debug: boolean,
-): GPOSTable {
+function readGPOSTable(reader: BinaryReader, offset: number, debug: boolean): GPOSTable {
   const position = reader.getPosition();
   reader.setPosition(offset);
 
@@ -582,190 +516,154 @@ function readGPOSTable(
     // Only extension supported for now.
     if (lookupType === LookupType.ExtensionPositioning) {
       for (let j = 0; j < subTableCount; j++) {
-        reader.setPosition(
-          offset + lookupListOffset + lookupTables[i] + subTableOffsets[j],
-        );
+        reader.setPosition(offset + lookupListOffset + lookupTables[i] + subTableOffsets[j]);
 
         const posFormat = reader.getUint16();
         const extensionLookupType = reader.getUint16();
         const extensionOffset = reader.getUint32();
 
-        let extension = {} as
-          | ExtensionLookupType2Format1
-          | ExtensionLookupType2Format2;
-        reader.runAt(
-          offset +
-            lookupListOffset +
-            lookupTables[i] +
-            subTableOffsets[j] +
-            extensionOffset,
-          () => {
-            if (extensionLookupType === LookupType.PairAdjustment) {
-              const posFormat = reader.getUint16();
-              invariant(
-                posFormat === 1 || posFormat === 2,
-                "Invalid posFormat.",
+        let extension = {} as ExtensionLookupType2Format1 | ExtensionLookupType2Format2;
+        reader.runAt(offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset, () => {
+          if (extensionLookupType === LookupType.PairAdjustment) {
+            const posFormat = reader.getUint16();
+            invariant(posFormat === 1 || posFormat === 2, "Invalid posFormat.");
+            extension.posFormat = posFormat;
+
+            if (posFormat === 1) {
+              const coverageOffset = reader.getUint16();
+              const valueFormat1 = reader.getUint16();
+              const valueFormat2 = reader.getUint16();
+              const pairSetCount = reader.getUint16();
+              const pairSetOffsets: number[] = [];
+              for (let i = 0; i < pairSetCount; i++) {
+                pairSetOffsets.push(reader.getUint16());
+              }
+
+              const pairSets: Array<
+                Array<{
+                  secondGlyph: number;
+                  value1?: ValueRecord;
+                  value2?: ValueRecord;
+                }>
+              > = [];
+              for (let k = 0; k < pairSetCount; k++) {
+                reader.setPosition(
+                  offset +
+                    lookupListOffset +
+                    lookupTables[i] +
+                    subTableOffsets[j] +
+                    extensionOffset +
+                    pairSetOffsets[k],
+                );
+
+                const pairValueCount = reader.getUint16();
+                const pairValues: (typeof pairSets)[number] = [];
+                for (let l = 0; l < pairValueCount; l++) {
+                  const pairValue: (typeof pairSets)[number][number] = {
+                    secondGlyph: reader.getUint16(),
+                  };
+                  const value1 = getValueRecord(reader, valueFormat1);
+                  const value2 = getValueRecord(reader, valueFormat2);
+
+                  if (value1) {
+                    pairValue.value1 = value1;
+                  }
+                  if (value2) {
+                    pairValue.value2 = value2;
+                  }
+                  pairValues.push(pairValue);
+                }
+                pairSets.push(pairValues);
+              }
+
+              extension.coverage = reader.runAt(
+                offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset + coverageOffset,
+                () => {
+                  const coverageFormat = reader.getUint16();
+
+                  return parseCoverage(reader, coverageFormat);
+                },
               );
-              extension.posFormat = posFormat;
 
-              if (posFormat === 1) {
-                const coverageOffset = reader.getUint16();
-                const valueFormat1 = reader.getUint16();
-                const valueFormat2 = reader.getUint16();
-                const pairSetCount = reader.getUint16();
-                const pairSetOffsets: number[] = [];
-                for (let i = 0; i < pairSetCount; i++) {
-                  pairSetOffsets.push(reader.getUint16());
-                }
+              extension = {
+                ...extension,
+                valueFormat1: valueFormat1,
+                valueFormat2: valueFormat2,
+                pairSets,
+              } as ExtensionLookupType2Format1;
+            } else if (posFormat === 2) {
+              const coverageOffset = reader.getUint16();
+              const valueFormat1 = reader.getUint16();
+              const valueFormat2 = reader.getUint16();
+              const classDef1Offset = reader.getUint16();
+              const classDef2Offset = reader.getUint16();
+              const class1Count = reader.getUint16();
+              const class2Count = reader.getUint16();
 
-                const pairSets: Array<
-                  Array<{
-                    secondGlyph: number;
-                    value1?: ValueRecord;
-                    value2?: ValueRecord;
-                  }>
-                > = [];
-                for (let k = 0; k < pairSetCount; k++) {
-                  reader.setPosition(
-                    offset +
-                      lookupListOffset +
-                      lookupTables[i] +
-                      subTableOffsets[j] +
-                      extensionOffset +
-                      pairSetOffsets[k],
-                  );
+              extension.coverage = reader.runAt(
+                offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset + coverageOffset,
+                () => {
+                  const coverageFormat = reader.getUint16();
+                  return parseCoverage(reader, coverageFormat);
+                },
+              );
 
-                  const pairValueCount = reader.getUint16();
-                  const pairValues: (typeof pairSets)[number] = [];
-                  for (let l = 0; l < pairValueCount; l++) {
-                    const pairValue: (typeof pairSets)[number][number] = {
-                      secondGlyph: reader.getUint16(),
-                    };
-                    const value1 = getValueRecord(reader, valueFormat1);
-                    const value2 = getValueRecord(reader, valueFormat2);
+              let classDef1 = reader.runAt(
+                offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset + classDef1Offset,
+                () => {
+                  return parseClassDef(reader);
+                },
+              );
 
-                    if (value1) {
-                      pairValue.value1 = value1;
-                    }
-                    if (value2) {
-                      pairValue.value2 = value2;
-                    }
-                    pairValues.push(pairValue);
+              let classDef2 = reader.runAt(
+                offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset + classDef2Offset,
+                () => {
+                  return parseClassDef(reader);
+                },
+              );
+
+              const classRecords: Array<
+                Array<{
+                  value1?: ValueRecord;
+                  value2?: ValueRecord;
+                }>
+              > = [];
+
+              for (let k = 0; k < class1Count; k++) {
+                let class1Record: (typeof classRecords)[number] = [];
+                for (let l = 0; l < class2Count; l++) {
+                  const class2Record: (typeof class1Record)[number] = {};
+                  const value1 = getValueRecord(reader, valueFormat1);
+                  const value2 = getValueRecord(reader, valueFormat2);
+
+                  if (value1) {
+                    class2Record.value1 = value1;
                   }
-                  pairSets.push(pairValues);
-                }
 
-                extension.coverage = reader.runAt(
-                  offset +
-                    lookupListOffset +
-                    lookupTables[i] +
-                    subTableOffsets[j] +
-                    extensionOffset +
-                    coverageOffset,
-                  () => {
-                    const coverageFormat = reader.getUint16();
-
-                    return parseCoverage(reader, coverageFormat);
-                  },
-                );
-
-                extension = {
-                  ...extension,
-                  valueFormat1: valueFormat1,
-                  valueFormat2: valueFormat2,
-                  pairSets,
-                } as ExtensionLookupType2Format1;
-              } else if (posFormat === 2) {
-                const coverageOffset = reader.getUint16();
-                const valueFormat1 = reader.getUint16();
-                const valueFormat2 = reader.getUint16();
-                const classDef1Offset = reader.getUint16();
-                const classDef2Offset = reader.getUint16();
-                const class1Count = reader.getUint16();
-                const class2Count = reader.getUint16();
-
-                extension.coverage = reader.runAt(
-                  offset +
-                    lookupListOffset +
-                    lookupTables[i] +
-                    subTableOffsets[j] +
-                    extensionOffset +
-                    coverageOffset,
-                  () => {
-                    const coverageFormat = reader.getUint16();
-                    return parseCoverage(reader, coverageFormat);
-                  },
-                );
-
-                let classDef1 = reader.runAt(
-                  offset +
-                    lookupListOffset +
-                    lookupTables[i] +
-                    subTableOffsets[j] +
-                    extensionOffset +
-                    classDef1Offset,
-                  () => {
-                    return parseClassDef(reader);
-                  },
-                );
-
-                let classDef2 = reader.runAt(
-                  offset +
-                    lookupListOffset +
-                    lookupTables[i] +
-                    subTableOffsets[j] +
-                    extensionOffset +
-                    classDef2Offset,
-                  () => {
-                    return parseClassDef(reader);
-                  },
-                );
-
-                const classRecords: Array<
-                  Array<{
-                    value1?: ValueRecord;
-                    value2?: ValueRecord;
-                  }>
-                > = [];
-
-                for (let k = 0; k < class1Count; k++) {
-                  let class1Record: (typeof classRecords)[number] = [];
-                  for (let l = 0; l < class2Count; l++) {
-                    const class2Record: (typeof class1Record)[number] = {};
-                    const value1 = getValueRecord(reader, valueFormat1);
-                    const value2 = getValueRecord(reader, valueFormat2);
-
-                    if (value1) {
-                      class2Record.value1 = value1;
-                    }
-
-                    if (value2) {
-                      class2Record.value2 = value2;
-                    }
-
-                    class1Record.push(class2Record);
+                  if (value2) {
+                    class2Record.value2 = value2;
                   }
-                  classRecords.push(class1Record);
-                }
 
-                extension = {
-                  ...extension,
-                  valueFormat1: valueFormat1,
-                  valueFormat2: valueFormat2,
-                  classDef1,
-                  classDef2,
-                  classRecords,
-                } as ExtensionLookupType2Format2;
-              } else {
-                if (debug) {
-                  console.warn(
-                    "Only Pair Adjustment lookup format 1 and 2 are supported.",
-                  );
+                  class1Record.push(class2Record);
                 }
+                classRecords.push(class1Record);
+              }
+
+              extension = {
+                ...extension,
+                valueFormat1: valueFormat1,
+                valueFormat2: valueFormat2,
+                classDef1,
+                classDef2,
+                classRecords,
+              } as ExtensionLookupType2Format2;
+            } else {
+              if (debug) {
+                console.warn("Only Pair Adjustment lookup format 1 and 2 are supported.");
               }
             }
-          },
-        );
+          }
+        });
 
         lookup.subtables.push({
           posFormat,
@@ -992,10 +890,7 @@ export type CoverageTableFormat2 = {
 /**
  * https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#value-record
  */
-function getValueRecord(
-  reader: BinaryReader,
-  valueRecord: number,
-): ValueRecord | undefined {
+function getValueRecord(reader: BinaryReader, valueRecord: number): ValueRecord | undefined {
   let result: ValueRecord = {};
 
   if (valueRecord & 0x0001) {
@@ -1037,10 +932,7 @@ function getValueRecord(
   return result;
 }
 
-function parseCoverage(
-  reader: BinaryReader,
-  coverageFormat: number,
-): CoverageTableFormat1 | CoverageTableFormat2 {
+function parseCoverage(reader: BinaryReader, coverageFormat: number): CoverageTableFormat1 | CoverageTableFormat2 {
   if (coverageFormat === 2) {
     const rangeCount = reader.getUint16();
     const rangeRecords = [];

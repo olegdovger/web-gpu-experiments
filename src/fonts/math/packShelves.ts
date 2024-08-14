@@ -1,4 +1,4 @@
-import { invariant } from "../invariant";
+import { invariant } from "../../utils/invariant.ts";
 import { Vec2 } from "./Vec2";
 
 export type Packing = {
@@ -85,9 +85,7 @@ export function packShelves(sizes: Vec2[]): Packing {
   return {
     width: size,
     height: size,
-    positions: rectangles.map(
-      (rectangle) => new Vec2(rectangle.x, rectangle.y),
-    ),
+    positions: rectangles.map((rectangle) => new Vec2(rectangle.x, rectangle.y)),
   };
 }
 

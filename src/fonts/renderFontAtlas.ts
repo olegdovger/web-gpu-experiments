@@ -1,4 +1,4 @@
-import { invariant } from "./invariant";
+import { invariant } from "../utils/invariant.ts";
 import { Lookups } from "./prepareLookups";
 import { toSDF } from "./toSDF";
 
@@ -74,18 +74,8 @@ export async function renderFontAtlas(
 
   if (options?.useSDF) {
     // Apply SDF.
-    const imageData = context.getImageData(
-      0,
-      0,
-      lookups.atlas.width,
-      lookups.atlas.height,
-    );
-    const sdfData = toSDF(
-      imageData,
-      lookups.atlas.width,
-      lookups.atlas.height,
-      ATLAS_RADIUS,
-    );
+    const imageData = context.getImageData(0, 0, lookups.atlas.width, lookups.atlas.height);
+    const sdfData = toSDF(imageData, lookups.atlas.width, lookups.atlas.height, ATLAS_RADIUS);
     context.putImageData(sdfData, 0, 0);
   }
 

@@ -1,4 +1,4 @@
-import { invariant } from "./invariant";
+import { invariant } from "../utils/invariant.ts";
 import { Vec2 } from "./math/Vec2";
 import { Vec4 } from "./math/Vec4";
 import { packShelves } from "./math/packShelves";
@@ -32,13 +32,7 @@ export function prepareLookups(
   const glyphs = calculateGlyphQuads(ttf, options?.alphabet);
 
   const transform = (x: number): number => Math.ceil(x * scale);
-  const sizes = glyphs.map(
-    (g) =>
-      new Vec2(
-        transform(g.width) + ATLAS_GAP * 2,
-        transform(g.height) + ATLAS_GAP * 2,
-      ),
-  );
+  const sizes = glyphs.map((g) => new Vec2(transform(g.width) + ATLAS_GAP * 2, transform(g.height) + ATLAS_GAP * 2));
   const packing = packShelves(sizes);
   invariant(
     packing.positions.length === glyphs.length,
@@ -59,12 +53,7 @@ export function prepareLookups(
     const size = atlas.sizes[i];
 
     uvs.push(
-      new Vec4(
-        position.x / atlas.width,
-        position.y / atlas.height,
-        size.x / atlas.width,
-        size.y / atlas.height,
-      ),
+      new Vec4(position.x / atlas.width, position.y / atlas.height, size.x / atlas.width, size.y / atlas.height),
     );
   }
 
@@ -105,21 +94,13 @@ export function prepareLookups(
               if (coverage.coverageFormat === 2) {
                 let indexCounter = 0;
                 for (const range of coverage.rangeRecords) {
-                  for (
-                    let glyphID = range.startGlyphID;
-                    glyphID <= range.endGlyphID;
-                    glyphID++
-                  ) {
+                  for (let glyphID = range.startGlyphID; glyphID <= range.endGlyphID; glyphID++) {
                     const pairs = pairSets[indexCounter];
 
-                    const glyphKernMap =
-                      kerningPairs.get(glyphID) || new Map<number, number>();
+                    const glyphKernMap = kerningPairs.get(glyphID) || new Map<number, number>();
                     for (const pair of pairs) {
                       if (pair.value1?.xAdvance) {
-                        glyphKernMap.set(
-                          pair.secondGlyph,
-                          pair.value1.xAdvance,
-                        );
+                        glyphKernMap.set(pair.secondGlyph, pair.value1.xAdvance);
                       }
                     }
                     if (glyphKernMap.size > 0) {
@@ -130,9 +111,7 @@ export function prepareLookups(
                   }
                 }
               } else {
-                console.warn(
-                  `Coverage format ${coverage.coverageFormat} is not supported.`,
-                );
+                console.warn(`Coverage format ${coverage.coverageFormat} is not supported.`);
               }
             } else if (subtable.extension.posFormat === 2) {
               // Adjustment for glyph classes.
@@ -142,9 +121,7 @@ export function prepareLookups(
                 secondGlyphClassMapping = generateGlyphToClassMap(classDef2);
                 classRecords = subtable.extension.classRecords;
               } else {
-                console.warn(
-                  `Coverage format ${coverage.coverageFormat} is not supported.`,
-                );
+                console.warn(`Coverage format ${coverage.coverageFormat} is not supported.`);
               }
             }
           }
@@ -191,9 +168,7 @@ export function prepareLookups(
   };
 }
 
-function generateGlyphToClassMap(
-  classDef: ClassDefFormat1 | ClassDefFormat2,
-): Map<number, number> {
+function generateGlyphToClassMap(classDef: ClassDefFormat1 | ClassDefFormat2): Map<number, number> {
   const glyphToClass = new Map<number, number>();
 
   if (classDef.format === 1) {
@@ -206,11 +181,7 @@ function generateGlyphToClassMap(
   } else if (classDef.format === 2) {
     // ClassDefFormat2
     for (const range of classDef.ranges) {
-      for (
-        let glyphID = range.startGlyphID;
-        glyphID <= range.endGlyphID;
-        glyphID++
-      ) {
+      for (let glyphID = range.startGlyphID; glyphID <= range.endGlyphID; glyphID++) {
         glyphToClass.set(glyphID, range.class);
       }
     }
