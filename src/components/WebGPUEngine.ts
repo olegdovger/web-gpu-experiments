@@ -1,10 +1,7 @@
 import { FontRenderer } from "../fonts/FontRenderer.ts";
-import { invariant } from "../fonts/invariant.ts";
+import { invariant } from "../utils/invariant.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
-import initFontRenderer, {
-  LoadFontProps,
-  LoadFontSettings,
-} from "./WebGPUEngine/initFontRenderer.ts";
+import initFontRenderer, { LoadFontProps, LoadFontSettings } from "./WebGPUEngine/initFontRenderer.ts";
 
 export interface EngineSettings {
   clearValue: GPUColorDict;
@@ -67,8 +64,7 @@ class WebGPUEngine {
 
       const device = await adapter.requestDevice({
         requiredLimits: {
-          maxStorageBufferBindingSize:
-            adapter.limits.maxStorageBufferBindingSize,
+          maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
         },
       });
 
@@ -104,25 +100,18 @@ class WebGPUEngine {
     }
   }
 
-  private observeSizeChanges(
-    canvas: HTMLCanvasElement,
-    postCall?: (width: number, height: number) => Promise<void>,
-  ) {
-    new ElementSizeWatcher(
-      canvas,
-      this.settings?.debounceInterval,
-      async (width, height) => {
-        canvas.width = width * window.devicePixelRatio;
-        canvas.height = height * window.devicePixelRatio;
+  private observeSizeChanges(canvas: HTMLCanvasElement, postCall?: (width: number, height: number) => Promise<void>) {
+    new ElementSizeWatcher(canvas, this.settings?.debounceInterval, async (width, height) => {
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
 
-        this.debug("New width:", width, ", new height:", height);
+      this.debug("New width:", width, ", new height:", height);
 
-        await postCall?.(width, height);
+      await postCall?.(width, height);
 
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-      },
-    );
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    });
   }
 
   render(postRender: RenderFn) {
@@ -159,10 +148,7 @@ class WebGPUEngine {
     });
   }
 
-  loadFont(
-    props: LoadFontProps,
-    settings: LoadFontSettings,
-  ): Promise<FontRenderer> {
+  loadFont(props: LoadFontProps, settings: LoadFontSettings): Promise<FontRenderer> {
     return initFontRenderer({ ...props }, { ...settings });
   }
 }

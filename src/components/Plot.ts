@@ -1,5 +1,5 @@
 import commonSettings from "../common.settings.ts";
-import { invariant } from "../fonts/invariant.ts";
+import { invariant } from "../utils/invariant.ts";
 import WebGPUEngine, { EngineSettings, RenderFn } from "./WebGPUEngine.ts";
 
 class Plot {

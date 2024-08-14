@@ -1,6 +1,6 @@
 import { FontRenderer } from "../../fonts/FontRenderer";
 import createFontTexture from "../../fonts/createFontTexture";
-import { invariant } from "../../fonts/invariant";
+import { invariant } from "../../utils/invariant.ts";
 import { TTF, parseTTF } from "../../fonts/parseTTF";
 import { Lookups, prepareLookups } from "../../fonts/prepareLookups";
 import { renderFontAtlas } from "../../fonts/renderFontAtlas";
@@ -27,10 +27,7 @@ let parsedTTF: TTF;
 let fontAtlas: ImageBitmap;
 let preparedLookups: Lookups;
 
-async function initFontRenderer(
-  props: LoadFontProps,
-  settings: LoadFontSettings,
-): Promise<FontRenderer> {
+async function initFontRenderer(props: LoadFontProps, settings: LoadFontSettings): Promise<FontRenderer> {
   const { fontSource, device, canvas, context } = props;
   const { debug } = settings;
 
@@ -55,9 +52,7 @@ async function initFontRenderer(
 
   invariant(fontSource, "'fontSource' must be set.");
 
-  loadedFontFile ||= await fetch(fontSource).then((result) =>
-    result.arrayBuffer(),
-  );
+  loadedFontFile ||= await fetch(fontSource).then((result) => result.arrayBuffer());
 
   parsedTTF ||= parseTTF(loadedFontFile, { debug });
   preparedLookups ||= prepareLookups(parsedTTF);

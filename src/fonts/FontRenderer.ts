@@ -1,4 +1,4 @@
-import { invariant } from "./invariant";
+import { invariant } from "../utils/invariant.ts";
 import { Vec2 } from "./math/Vec2";
 import { Vec4 } from "./math/Vec4";
 import { Lookups } from "./prepareLookups";
@@ -47,15 +47,7 @@ export class FontRenderer {
   height: number;
 
   constructor(props: FontRendererProps) {
-    const {
-      device,
-      context,
-      colorTextureView,
-      width,
-      height,
-      clearValue,
-      fontColorValue,
-    } = props;
+    const { device, context, colorTextureView, width, height, clearValue, fontColorValue } = props;
 
     this.device = device;
     this.colorTextureView = colorTextureView;
@@ -186,12 +178,7 @@ export class FontRenderer {
     });
   }
 
-  text(
-    text: string,
-    position: Vec2,
-    fontSize: number,
-    color?: Vec4,
-  ): TextShape {
+  text(text: string, position: Vec2, fontSize: number, color?: Vec4): TextShape {
     invariant(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
@@ -252,9 +239,7 @@ export class FontRenderer {
       colorAttachments: [
         {
           view: this.colorTextureView,
-          resolveTarget: this.context
-            .getCurrentTexture()
-            .createView({ label: "antialiased resolve target" }),
+          resolveTarget: this.context.getCurrentTexture().createView({ label: "antialiased resolve target" }),
           // This is background color.
           clearValue: this.clearValue,
           loadOp: "clear",
