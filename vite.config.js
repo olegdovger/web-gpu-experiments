@@ -33,8 +33,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "docs/index.html"),
-        search: resolve(__dirname, "docs/search.html"),
+        main: resolve(__dirname, "output/index.html"),
+        search: resolve(__dirname, "output/search.html"),
         ...inputSamples,
       },
     },
