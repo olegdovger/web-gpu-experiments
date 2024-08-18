@@ -9,9 +9,7 @@ document.addEventListener(
 
     if (keyName.toLowerCase() === "k") {
       if (cltlMetaPressed) {
-        (
-          document.getElementById("searchBar") as HTMLDialogElement
-        )?.showModal();
+        (document.getElementById("searchBar") as HTMLDialogElement)?.showModal();
       }
     }
 

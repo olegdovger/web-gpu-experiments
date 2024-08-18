@@ -12,7 +12,7 @@ async function main() {
 }
 
 async function prepareDevice() {
-  const canvas = tryGet("Canvas element is empty", document.getElementById("canvas") as HTMLCanvasElement);
+  const canvas = tryGet("Canvas element is empty", document.getElementById("chart") as HTMLCanvasElement);
   const adapter = tryGet("Adapter is not available", await navigator.gpu.requestAdapter());
   const context = tryGet("Context is empty for some reason", canvas.getContext("webgpu"));
 
@@ -25,15 +25,14 @@ async function prepareDevice() {
   return { device, format, context };
 }
 
-// Функция для создания буфера вершин
 function makeDataStore(device?: GPUDevice) {
   const vertices = new Float32Array([
     -0.8,
-    0.0, // Точка 1
+    0.0, // Point 1
     0.0,
-    0.8, // Точка 2
+    0.8, // Point 2
     0.8,
-    -0.4, // Точка 3
+    -0.4, // Point 3
   ]);
 
   invariant(device, "No device");
@@ -48,7 +47,6 @@ function makeDataStore(device?: GPUDevice) {
   return vertexBuffer;
 }
 
-// Функция для создания пайплайна
 function prepareRendering(device: GPUDevice, format: GPUTextureFormat) {
   const shaderModule = device.createShaderModule({
     code: `
@@ -64,7 +62,7 @@ function prepareRendering(device: GPUDevice, format: GPUTextureFormat) {
     `,
   });
 
-  const pipeline = device.createRenderPipeline({
+  return device.createRenderPipeline({
     layout: "auto",
     vertex: {
       module: shaderModule,
@@ -95,8 +93,6 @@ function prepareRendering(device: GPUDevice, format: GPUTextureFormat) {
       topology: "line-strip",
     },
   });
-
-  return pipeline;
 }
 
 // Функция для выполнения процесса рисования
