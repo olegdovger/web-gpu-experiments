@@ -25,10 +25,7 @@ function findElements(value: string): void {
 
     const searchString = element.getAttribute("data-search")?.toLowerCase();
 
-    if (
-      searchString &&
-      searchWords.some((word) => searchString.includes(word))
-    ) {
+    if (searchString && searchWords.some((word) => searchString.includes(word))) {
       element.style.display = "flex";
     } else {
       element.style.display = "none";
@@ -38,9 +35,7 @@ function findElements(value: string): void {
 
 document
   .getElementById("searchInput")
-  ?.addEventListener("input", (e) =>
-    findElements((e.target as HTMLInputElement).value ?? ""),
-  );
+  ?.addEventListener("input", (e) => findElements((e.target as HTMLInputElement).value ?? ""));
 
 document.getElementById("searchBar")?.addEventListener("close", () => {
   const elements = document.querySelectorAll<HTMLDivElement>("[data-search]");

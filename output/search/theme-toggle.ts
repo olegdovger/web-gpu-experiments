@@ -1,12 +1,8 @@
 const storageKey = "theme-preference";
 
 const getColorPreference = () => {
-  if (localStorage.getItem(storageKey))
-    return localStorage.getItem(storageKey) ?? "light";
-  else
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+  if (localStorage.getItem(storageKey)) return localStorage.getItem(storageKey) ?? "light";
+  else return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 };
 
 const theme = {
@@ -27,9 +23,7 @@ const setPreference = () => {
 
 const reflectPreference = () => {
   document.firstElementChild?.setAttribute("data-theme", theme.value);
-  document
-    .querySelector("#theme-toggle")
-    ?.setAttribute("aria-label", theme.value);
+  document.querySelector("#theme-toggle")?.setAttribute("aria-label", theme.value);
 };
 
 // set early so no page flashes / CSS is made aware
@@ -40,15 +34,11 @@ window.onload = () => {
   reflectPreference();
 
   // now this script can find and listen for clicks on the control
-  document
-    .querySelector("#theme-toggle")
-    ?.addEventListener("click", onClick, true);
+  document.querySelector("#theme-toggle")?.addEventListener("click", onClick, true);
 };
 
 // sync with system changes
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", ({ matches: isDark }) => {
-    theme.value = isDark ? "dark" : "light";
-    setPreference();
-  });
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches: isDark }) => {
+  theme.value = isDark ? "dark" : "light";
+  setPreference();
+});

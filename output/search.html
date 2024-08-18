@@ -10,32 +10,13 @@
     <link rel="stylesheet" href="../public/styles/search/search.css" />
   </head>
   <body>
-    <div
-      class="theme-toggle"
-      id="theme-toggle"
-      title="Toggles light & dark"
-      aria-label="auto"
-      aria-live="polite"
-    >
-      <svg
-        class="sun-and-moon"
-        aria-hidden="true"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-      >
+    <div class="theme-toggle" id="theme-toggle" title="Toggles light & dark" aria-label="auto" aria-live="polite">
+      <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
         <mask class="moon" id="moon-mask">
           <rect x="0" y="0" width="100%" height="100%" fill="white" />
           <circle cx="24" cy="10" r="6" fill="black" />
         </mask>
-        <circle
-          class="sun"
-          cx="12"
-          cy="12"
-          r="6"
-          mask="url(#moon-mask)"
-          fill="currentColor"
-        />
+        <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)" fill="currentColor" />
         <g class="sun-beams" stroke="currentColor">
           <line x1="12" y1="1" x2="12" y2="3" />
           <line x1="12" y1="21" x2="12" y2="23" />
@@ -50,12 +31,7 @@
     </div>
 
     <div class="search-button">
-      <span
-        class="button outline-like"
-        tabindex="1"
-        id="searchButton"
-        onclick="searchBar.showModal()"
-      >
+      <span class="button outline-like" tabindex="1" id="searchButton" onclick="searchBar.showModal()">
         <img src="/icons/search.svg" alt="search" />
       </span>
     </div>
@@ -67,12 +43,7 @@
             <img src="/icons/leading.svg" alt="leading" />
           </span>
           <form class="search-form" method="dialog" id="searchForm">
-            <input
-              type="search"
-              placeholder="Search..."
-              tabindex="0"
-              id="searchInput"
-            />
+            <input type="search" placeholder="Search..." tabindex="0" id="searchInput" />
             <button type="submit">
               <span class="button">
                 <img src="/icons/search.svg" alt="search" />
@@ -82,141 +53,83 @@
         </div>
         <div class="sample-layout">
           <div class="sample" data-search="Plain render" style="display: flex">
-            <iframe
-              src="/web-gpu-experiments/samples/plain-rectangle/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/plain-rectangle/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/plain-rectangle/index.html"
-                target="_blank"
-                >Plain render</a
-              >
+              <a href="/web-gpu-experiments/samples/plain-rectangle/index.html" target="_blank">Plain render</a>
             </div>
           </div>
-          <div
-            class="sample"
-            data-search="Send data points to shader"
-            style="display: flex"
-          >
-            <iframe
-              src="/web-gpu-experiments/samples/external-data/index.html"
-            ></iframe>
+          <div class="sample" data-search="Send data points to shader" style="display: flex">
+            <iframe src="/web-gpu-experiments/samples/external-data/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/external-data/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/external-data/index.html" target="_blank"
                 >Send data points to shader</a
               >
             </div>
           </div>
-          <div
-            class="sample"
-            data-search="Coord. system from top-left"
-            style="display: flex"
-          >
-            <iframe
-              src="/web-gpu-experiments/samples/top-left-coord-system/index.html"
-            ></iframe>
+          <div class="sample" data-search="Coord. system from top-left" style="display: flex">
+            <iframe src="/web-gpu-experiments/samples/top-left-coord-system/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/top-left-coord-system/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/top-left-coord-system/index.html" target="_blank"
                 >Coord. system from top-left</a
               >
             </div>
           </div>
           <div class="sample" data-search="Coord. system from bottom-left">
-            <iframe
-              src="/web-gpu-experiments/samples/bottom-left-coord-system/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/bottom-left-coord-system/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/bottom-left-coord-system/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/bottom-left-coord-system/index.html" target="_blank"
                 >Coord. system from bottom-left</a
               >
             </div>
           </div>
           <div class="sample" data-search="Fixed size primitive">
-            <iframe
-              src="/web-gpu-experiments/samples/fixed-size/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/fixed-size/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/fixed-size/index.html"
-                target="_blank"
-                >Fixed size primitive</a
-              >
+              <a href="/web-gpu-experiments/samples/fixed-size/index.html" target="_blank">Fixed size primitive</a>
             </div>
           </div>
           <div class="sample" data-search="Font (Inter)">
             <iframe src="/web-gpu-experiments/samples/font/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/font/index.html"
-                target="_blank"
-                >Font (Inter)</a
-              >
+              <a href="/web-gpu-experiments/samples/font/index.html" target="_blank">Font (Inter)</a>
             </div>
           </div>
           <div class="sample" data-search="Font (JetBrainsMono-Regular)">
-            <iframe
-              src="/web-gpu-experiments/samples/font-jetbrains-mono/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/font-jetbrains-mono/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/font-jetbrains-mono/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/font-jetbrains-mono/index.html" target="_blank"
                 >Font (JetBrainsMono-Regular)</a
               >
             </div>
           </div>
           <div class="sample" data-search="Font (JetBrainsMono-Thin)">
-            <iframe
-              src="/web-gpu-experiments/samples/font-jetbrains-mono-thin/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/font-jetbrains-mono-thin/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/font-jetbrains-mono-thin/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/font-jetbrains-mono-thin/index.html" target="_blank"
                 >Font (JetBrainsMono-Thin)</a
               >
             </div>
           </div>
           <div class="sample" data-search="Font (JetBrainsMono-Bold)">
-            <iframe
-              src="/web-gpu-experiments/samples/font-jetbrains-mono-bold/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/font-jetbrains-mono-bold/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/font-jetbrains-mono-bold/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/font-jetbrains-mono-bold/index.html" target="_blank"
                 >Font (JetBrainsMono-Bold)</a
               >
             </div>
           </div>
           <div class="sample" data-search="Font, background colors">
-            <iframe
-              src="/web-gpu-experiments/samples/font-and-backgroud-colors/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/font-and-backgroud-colors/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/font-and-backgroud-colors/index.html"
-                target="_blank"
+              <a href="/web-gpu-experiments/samples/font-and-backgroud-colors/index.html" target="_blank"
                 >Font, background colors</a
               >
             </div>
           </div>
           <div class="sample" data-search="Font, line, colors">
-            <iframe
-              src="/web-gpu-experiments/samples/lines-and-text/index.html"
-            ></iframe>
+            <iframe src="/web-gpu-experiments/samples/lines-and-text/index.html"></iframe>
             <div class="explanation">
-              <a
-                href="/web-gpu-experiments/samples/lines-and-text/index.html"
-                target="_blank"
-                >Font, line, colors</a
-              >
+              <a href="/web-gpu-experiments/samples/lines-and-text/index.html" target="_blank">Font, line, colors</a>
             </div>
           </div>
         </div>
