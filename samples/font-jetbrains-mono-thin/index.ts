@@ -1,20 +1,15 @@
-import Chart from "../../src/components/Chart";
-import { Vec2 } from "../../src/fonts/math/Vec2";
-import { Vec4 } from "../../src/fonts/math/Vec4";
+import Sample from "../../src/components/Sample.ts";
+import { Vec2 } from "../../src/fonts/ttf/math/Vec2";
+import { Vec4 } from "../../src/fonts/ttf/math/Vec4";
 import commonSettings from "../../src/common.settings";
 
-const chart = new Chart(document.getElementById("chart"), {
+const sample = new Sample(document.getElementById("sample"), {
   ...commonSettings,
   fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Thin.ttf",
 });
 
-chart.render(({ font }) => {
-  font.text(
-    "The quick brown fox jumps over the lazy dog",
-    new Vec2(16, 16),
-    16,
-    new Vec4(1, 1, 1, 1),
-  );
+sample.render(({ font }) => {
+  font.text("The quick brown fox jumps over the lazy dog", new Vec2(16, 16), 16, new Vec4(1, 1, 1, 1));
 
   font.text(
     ". … → ← ↑ ↓ Å Ä Ö Ë Ü Ï Ÿ å ä ö ë ü ï ÿ Ø ø •",

@@ -3,10 +3,7 @@ interface VertexBufferProps {
   device: GPUDevice;
 }
 
-export default function makeVertexBuffer({
-  vertices1DArray,
-  device,
-}: VertexBufferProps): GPUBuffer {
+export default function makeVertexBuffer({ vertices1DArray, device }: VertexBufferProps): GPUBuffer {
   const vertices = new Float32Array(vertices1DArray);
 
   const buffer = device.createBuffer({

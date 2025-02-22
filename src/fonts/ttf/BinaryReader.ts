@@ -15,8 +15,7 @@ export class BinaryReader {
   }
 
   getUint16(): Uint16 {
-    const value =
-      ((this.data[this.position] << 8) | this.data[this.position + 1]) >>> 0;
+    const value = ((this.data[this.position] << 8) | this.data[this.position + 1]) >>> 0;
     this.position += 2;
     return value;
   }

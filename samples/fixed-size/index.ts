@@ -1,13 +1,13 @@
-import Chart from "../../src/components/Chart.ts";
+import Sample from "../../src/components/Sample.ts";
 import { renderPass } from "../../src/renderers/baseRenderer.ts";
 import createPipeline from "../../src/renderers/pipelines/line-strip.pipeline.ts";
 import shaderCode from "./shader.wgsl?raw";
 import makeVertexBuffer from "../../src/utils/makeVertexBuffer.ts";
 import commonSettings from "../../src/common.settings.ts";
 
-const chart = new Chart(document.getElementById("chart"), commonSettings);
+const sample = new Sample(document.getElementById("sample"), commonSettings);
 
-chart.render(({ device, context, width, height }) => {
+sample.render(({ device, context, width, height }) => {
   renderPass(device, context, async (passEncoder) => {
     const points = [0, 0, 50, 0, 50, 50, 0, 50, 0, 0];
 

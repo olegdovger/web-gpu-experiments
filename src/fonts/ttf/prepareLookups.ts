@@ -1,10 +1,10 @@
-import { invariant } from "../utils/invariant.ts";
-import { Vec2 } from "./math/Vec2";
-import { Vec4 } from "./math/Vec4";
-import { packShelves } from "./math/packShelves";
-import { Glyph, calculateGlyphQuads } from "./calculateGlyphQuads";
-import { ClassDefFormat1, ClassDefFormat2, TTF, ValueRecord } from "./parseTTF";
-import { ATLAS_FONT_SIZE, ATLAS_GAP } from "./renderFontAtlas";
+import { invariant } from "../../utils/invariant.ts";
+import { Vec2 } from "./math/Vec2.ts";
+import { Vec4 } from "./math/Vec4.ts";
+import { packShelves } from "./math/packShelves.ts";
+import { Glyph, calculateGlyphQuads } from "./calculateGlyphQuads.ts";
+import { ClassDefFormat1, ClassDefFormat2, TTF, ValueRecord } from "./parseTTF.ts";
+import { ATLAS_FONT_SIZE, ATLAS_GAP } from "./renderFontAtlas.ts";
 
 export type Lookups = {
   unitsPerEm: number;

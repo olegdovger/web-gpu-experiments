@@ -1,6 +1,6 @@
 import commonSettings from "../../src/common.settings";
 import Plot from "../../src/components/Plot";
-import { Vec2 } from "../../src/fonts/math/Vec2";
+import { Vec2 } from "../../src/fonts/ttf/math/Vec2";
 import { renderPass } from "../../src/renderers/baseRenderer";
 import createLineListPipeline from "../../src/renderers/pipelines/line-list.pipeline";
 import computeShaderCode from "./shader.compute.wgsl?raw";
@@ -9,7 +9,7 @@ import makeVertexBuffer from "../../src/utils/makeVertexBuffer";
 import hexToGPUColorDict from "../../src/utils/hexToGPUColorDict.ts";
 import hexToGPUVec4f from "../../src/utils/hexToGPUVec4f.ts";
 
-const plot = new Plot(document.getElementById("chart"), {
+const plot = new Plot(document.getElementById("sample"), {
   ...commonSettings,
   fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Regular.ttf",
   // fontSource: "/web-gpu-experiments/fonts/Inter.ttf",
@@ -105,18 +105,10 @@ plot.render(async ({ device, context, font, width, height }) => {
     dataOutput.forEach((item, index) => {
       const itemString = item.toString();
 
-      font.text(
-        itemString,
-        new Vec2(textPadding, textPadding + fontSize * index),
-        fontSize,
-      );
+      font.text(itemString, new Vec2(textPadding, textPadding + fontSize * index), fontSize);
     });
 
-    const textShape = font.text(
-      "Lorem Ipsum is simply dummy text of the printing a",
-      new Vec2(100, 30),
-      16,
-    );
+    const textShape = font.text("Lorem Ipsum is simply dummy text of the printing a", new Vec2(100, 30), 16);
 
     font.render();
 
@@ -124,35 +116,20 @@ plot.render(async ({ device, context, font, width, height }) => {
       label: "Base Renderer: command encoder",
     });
 
-    const renderPassEncoder: GPURenderPassEncoder =
-      commandEncoder.beginRenderPass({
-        colorAttachments: [
-          {
-            view: context.getCurrentTexture().createView(),
-            loadOp: "load",
-            storeOp: "store",
-          },
-        ],
-      });
+    const renderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: context.getCurrentTexture().createView(),
+          loadOp: "load",
+          storeOp: "store",
+        },
+      ],
+    });
 
     const coordLineColor = hexToGPUVec4f("#CCEC57A5");
 
-    const verticalCoordLine = [
-      20,
-      5,
-      ...coordLineColor,
-      20,
-      height - 10,
-      ...coordLineColor,
-    ];
-    const horizontalCoordLine = [
-      5,
-      20,
-      ...coordLineColor,
-      width - 10,
-      20,
-      ...coordLineColor,
-    ];
+    const verticalCoordLine = [20, 5, ...coordLineColor, 20, height - 10, ...coordLineColor];
+    const horizontalCoordLine = [5, 20, ...coordLineColor, width - 10, 20, ...coordLineColor];
 
     const verticalTicks = Array.from({ length: Math.floor((height - 20) / 40) })
       .fill(0)

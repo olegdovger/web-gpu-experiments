@@ -5,7 +5,9 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+
     /* Bundler mode */
+    "moduleDetection": "force",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -16,12 +18,15 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
     "types": ["vite/client", "@webgpu/types"]
   },
   "include": [
     "src",
     "samples/**/*.ts",
-    "declarations.d.ts",
+    "types/declarations.d.ts",
+    "types/webgpu.d.ts",
     "./node_modules/@webgpu/types/**/*.d.ts"
   ]
 }

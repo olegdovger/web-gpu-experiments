@@ -5,17 +5,10 @@ async function createFontTexture(device: GPUDevice, imageBitmap: ImageBitmap) {
     label: "image bitmap",
     size,
     format: "rgba8unorm",
-    usage:
-      GPUTextureUsage.TEXTURE_BINDING |
-      GPUTextureUsage.COPY_DST |
-      GPUTextureUsage.RENDER_ATTACHMENT,
+    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
   });
 
-  device.queue.copyExternalImageToTexture(
-    { source: imageBitmap },
-    { texture },
-    size,
-  );
+  device.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, size);
 
   return texture;
 }

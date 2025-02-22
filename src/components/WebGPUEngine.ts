@@ -1,4 +1,4 @@
-import { FontRenderer } from "../fonts/FontRenderer.ts";
+import { FontRenderer } from "../fonts/ttf/FontRenderer.ts";
 import { invariant } from "../utils/invariant.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
 import initFontRenderer, { LoadFontProps, LoadFontSettings } from "./WebGPUEngine/initFontRenderer.ts";

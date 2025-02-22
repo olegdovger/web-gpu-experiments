@@ -1,5 +1,5 @@
-import { invariant } from "../utils/invariant.ts";
-import { TTF } from "./parseTTF";
+import { invariant } from "../../utils/invariant.ts";
+import { TTF } from "./parseTTF.ts";
 
 export type Glyph = {
   /**

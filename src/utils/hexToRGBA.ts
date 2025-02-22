@@ -16,9 +16,7 @@ export const expandShortHexColor = (hexColor: string): string => {
   return hexColor;
 };
 
-export const hexToRGBA = (
-  hexColor: string,
-): [number, number, number, number] => {
+export const hexToRGBA = (hexColor: string): [number, number, number, number] => {
   if (!validateHexColor(hexColor)) {
     throw new Error("Invalid hex color format");
   }

@@ -1,5 +1,5 @@
-import { invariant } from "../utils/invariant.ts";
-import { BinaryReader, Fixed, FWord, Int16, Uint16, Uint32 } from "./BinaryReader";
+import { invariant } from "../../utils/invariant.ts";
+import { BinaryReader, Fixed, FWord, Int16, Uint16, Uint32 } from "./BinaryReader.ts";
 
 interface ParseSettings {
   debug: boolean;

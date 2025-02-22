@@ -1,6 +1,6 @@
-import { invariant } from "../utils/invariant.ts";
-import { Lookups } from "./prepareLookups";
-import { toSDF } from "./toSDF";
+import { invariant } from "../../utils/invariant.ts";
+import { Lookups } from "./prepareLookups.ts";
+import { toSDF } from "./toSDF.ts";
 
 /**
  * Font size used in font atlas.
