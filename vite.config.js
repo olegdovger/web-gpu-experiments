@@ -33,6 +33,7 @@ try {
 
 export default defineConfig({
   build: {
+    target: "esnext",
     rollupOptions: {
       input: {
         main: resolve(__dirname, "output/index.html"),
