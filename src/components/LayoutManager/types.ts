@@ -38,8 +38,4 @@ type HorizontalLayout = {
 
 export type Layout = HorizontalLayout | VerticalLayout;
 
-export type Block =
-  | FullSizedBlock
-  | FullHeightBlock
-  | FullWidthBlock
-  | SizedBlock;
+export type Block = FullSizedBlock | FullHeightBlock | FullWidthBlock | SizedBlock;

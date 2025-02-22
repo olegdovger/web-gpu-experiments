@@ -1,10 +1,7 @@
 class ElementSizeWatcher {
   private resizeObserver: ResizeObserver;
 
-  private debounce(
-    interval: number,
-    callback: (...args: any[]) => void,
-  ): (...args: any[]) => void {
+  private debounce(interval: number, callback: (...args: any[]) => void): (...args: any[]) => void {
     let debounceTimeoutId: number | undefined;
 
     return (...args) => {
@@ -12,10 +9,7 @@ class ElementSizeWatcher {
         clearTimeout(debounceTimeoutId);
       }
 
-      debounceTimeoutId = setTimeout(
-        () => callback.apply(this, args),
-        interval,
-      );
+      debounceTimeoutId = setTimeout(() => callback.apply(this, args), interval);
     };
   }
   constructor(

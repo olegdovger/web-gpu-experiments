@@ -3,22 +3,15 @@
 /**
  * Takes ImageData and returns a new ImageData with the SDF applied.
  */
-export function toSDF(
-  imageData: ImageData,
-  width: number,
-  height: number,
-  radius: number,
-): ImageData {
+export function toSDF(imageData: ImageData, width: number, height: number, radius: number): ImageData {
   const gridOuter = new Float64Array(width * height);
   const gridInner = new Float64Array(width * height);
 
   const INF = 1e20;
   for (let i = 0; i < width * height; i++) {
     const a = imageData.data[i * 4 + 3] / 255; // Alpha value.
-    gridOuter[i] =
-      a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
-    gridInner[i] =
-      a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
+    gridOuter[i] = a === 1 ? 0 : a === 0 ? INF : Math.pow(Math.max(0, 0.5 - a), 2);
+    gridInner[i] = a === 1 ? INF : a === 0 ? 0 : Math.pow(Math.max(0, a - 0.5), 2);
   }
 
   const s = Math.max(width, height);

@@ -4,7 +4,7 @@ export function invariant(value: unknown, message?: string): asserts value {
   }
 }
 
-export function tryGet<T extends unknown>(message: string, value: T): NonNullable<T> {
+export function tryGet<T>(message: string, value: T): NonNullable<T> {
   if (!value) {
     throw new Error(message);
   }

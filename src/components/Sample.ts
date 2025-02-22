@@ -1,7 +1,7 @@
 import commonSettings from "../common.settings.ts";
 import WebGPUEngine, { EngineSettings, RenderFn } from "./WebGPUEngine.ts";
 
-class Chart {
+class Sample {
   private engine: WebGPUEngine;
   private settings: EngineSettings;
 
@@ -45,4 +45,4 @@ class Chart {
   }
 }
 
-export default Chart;
+export default Sample;

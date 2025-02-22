@@ -1,7 +1,7 @@
-import { invariant } from "../utils/invariant.ts";
-import { Vec2 } from "./math/Vec2";
-import { Lookups } from "./prepareLookups";
-import { ATLAS_FONT_SIZE, ATLAS_GAP } from "./renderFontAtlas";
+import { invariant } from "../../utils/invariant.ts";
+import { Vec2 } from "./math/Vec2.ts";
+import { Lookups } from "./prepareLookups.ts";
+import { ATLAS_FONT_SIZE, ATLAS_GAP } from "./renderFontAtlas.ts";
 
 export type Shape = {
   boundingRectangle: { width: number; height: number };

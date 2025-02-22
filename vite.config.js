@@ -2,6 +2,8 @@ import fs from "fs";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import generatePageTypesPlugin from "./vite-plugins/generate-page-types-plugin.js";
+import generateOutputPagesPlugin from "./vite-plugins/generate-output-pages-plugin.js";
 
 const directoryPath = "./samples";
 const base = "web-gpu-experiments";
@@ -40,6 +42,8 @@ export default defineConfig({
     },
   },
   plugins: [
+    generatePageTypesPlugin(),
+    generateOutputPagesPlugin(),
     viteStaticCopy({
       targets: copyTargets,
     }),

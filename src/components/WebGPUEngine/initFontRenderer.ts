@@ -1,9 +1,9 @@
-import { FontRenderer } from "../../fonts/FontRenderer";
-import createFontTexture from "../../fonts/createFontTexture";
+import { FontRenderer } from "../../fonts/ttf/FontRenderer.ts";
+import createFontTexture from "../../fonts/ttf/createFontTexture.ts";
 import { invariant } from "../../utils/invariant.ts";
-import { TTF, parseTTF } from "../../fonts/parseTTF";
-import { Lookups, prepareLookups } from "../../fonts/prepareLookups";
-import { renderFontAtlas } from "../../fonts/renderFontAtlas";
+import { TTF, parseTTF } from "../../fonts/ttf/parseTTF.ts";
+import { Lookups, prepareLookups } from "../../fonts/ttf/prepareLookups.ts";
+import { renderFontAtlas } from "../../fonts/ttf/renderFontAtlas.ts";
 
 export interface LoadFontProps {
   fontSource?: string;

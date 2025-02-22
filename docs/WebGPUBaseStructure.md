@@ -3,8 +3,9 @@ Base WebGPU structure
 @startuml
 skinparam componentStyle rectangle
 skinparam component {
-BackgroundColor darkgreen
-BorderColor darkgreen
+BackgroundColor pink
+BorderColor black
+FontColor black
 }
 
 component GPUDevice

@@ -1,5 +1,5 @@
-import { invariant } from "../../utils/invariant.ts";
-import { Vec2 } from "./Vec2";
+import { invariant } from "../../../utils/invariant.ts";
+import { Vec2 } from "./Vec2.ts";
 
 export type Packing = {
   width: number;
