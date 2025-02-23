@@ -1,6 +1,6 @@
 There are WebGPU experiments. Be careful to use code in production environment.
 
-See examples here: ---
+See examples here: https://olegdovger.github.io/web-gpu-experiments/output/
 
 ### Development
 

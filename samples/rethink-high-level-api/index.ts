@@ -4,7 +4,7 @@ import makeBuffer from "./src/buffers/makeBuffer.ts";
 import makeDevice from "./src/makeDevice.ts";
 import makeRenderPipeline from "./src/makeRenderPipeline.ts";
 
-const shaderCode = await loadShader("./shader.wgsl");
+const shaderCode = await loadShader("/web-gpu-experiments/samples/rethink-high-level-api/shader.wgsl");
 
 /*
 
