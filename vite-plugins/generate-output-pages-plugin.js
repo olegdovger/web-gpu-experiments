@@ -5,6 +5,11 @@ import { XMLParser } from "fast-xml-parser";
 const xmlParser = new XMLParser();
 const basePath = "/web-gpu-experiments/samples";
 
+/**
+ * @param {string} samplesDir
+ * @param {string} outputFile
+ * @param {string} pageTitle
+ */
 function generateOutputPage(samplesDir, outputFile, pageTitle) {
   const pages = fs
     .readdirSync(samplesDir, { withFileTypes: true })
@@ -45,7 +50,11 @@ function generateOutputPage(samplesDir, outputFile, pageTitle) {
   console.log(`Updated file "${outputFile}"`);
 }
 
-function generateOutputSearchPage(samplesDir, outputFile, pageTitle) {
+/**
+ * @param {string} samplesDir
+ * @param {string} outputFile
+ */
+function generateOutputSearchPage(samplesDir, outputFile) {
   const pages = fs
     .readdirSync(samplesDir, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
