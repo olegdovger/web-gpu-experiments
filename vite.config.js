@@ -22,8 +22,8 @@ try {
       const build_dir = resolve(__dirname, `${base}/samples/${folder}/`);
 
       copyTargets.push({
-        src: "public/fonts/**/*",
-        dest: `${build_dir}/fonts/`,
+        src: `${dir}/**/*`,
+        dest: `${build_dir}`,
       });
     }
   });
