@@ -5,6 +5,8 @@ import { MsdfTextRenderer } from "../../src/fonts/msdf/text";
 import tgpu from "typegpu";
 import { ExtendedGPURenderPassDescriptor } from "../../types/webgpu";
 
+import fontJSON from "./font/basic-msdf/basic-msdf.json";
+
 const root = await tgpu.init();
 const device = root.device;
 
@@ -23,7 +25,7 @@ context.configure({
 });
 
 const textRenderer = new MsdfTextRenderer(root, presentationFormat, depthFormat);
-const font = await textRenderer.createFont(new URL("./font/basic-msdf/basic-msdf.json", import.meta.url).toString());
+const font = await textRenderer.createFont("/web-gpu-experiments/samples/msdf-font/font/basic-msdf/basic-msdf.json");
 
 const titleText = textRenderer.formatText(font, `«А хто там ідзе?»`, {
   centered: true,
