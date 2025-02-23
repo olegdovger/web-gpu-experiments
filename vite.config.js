@@ -4,11 +4,11 @@ import { resolve } from "path";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import generatePageTypesPlugin from "./vite-plugins/generate-page-types-plugin.js";
 import generateOutputPagesPlugin from "./vite-plugins/generate-output-pages-plugin.js";
+import copySampleFilesPlugin from "./vite-plugins/copy-sample-files-plugin.js";
 
 const directoryPath = "./samples";
-const base = "web-gpu-experiments";
+const base = "/web-gpu-experiments";
 const inputSamples = {};
-const copyTargets = [];
 
 try {
   const files = fs.readdirSync(directoryPath);
@@ -18,13 +18,6 @@ try {
 
     if (fs.existsSync(`${dir}/index.html`)) {
       inputSamples[folder] = `${dir}/index.html`;
-
-      const build_dir = resolve(__dirname, `${base}/samples/${folder}/`);
-
-      copyTargets.push({
-        src: `${dir}/**/*`,
-        dest: `${build_dir}`,
-      });
     }
   });
 } catch (error) {
@@ -45,9 +38,10 @@ export default defineConfig({
   plugins: [
     generatePageTypesPlugin(),
     generateOutputPagesPlugin(),
-    viteStaticCopy({
-      targets: copyTargets,
-    }),
+    // viteStaticCopy({
+    //   targets: copyTargets,
+    // }),
+    copySampleFilesPlugin(),
   ],
   base: base,
 });
