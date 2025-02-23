@@ -5,8 +5,6 @@ import { MsdfTextRenderer } from "../../src/fonts/msdf/text";
 import tgpu from "typegpu";
 import { ExtendedGPURenderPassDescriptor } from "../../types/webgpu";
 
-import fontJSON from "./font/basic-msdf/basic-msdf.json";
-
 const root = await tgpu.init();
 const device = root.device;
 
