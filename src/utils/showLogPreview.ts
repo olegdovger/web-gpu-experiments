@@ -1,5 +1,5 @@
 export default function showLogPreview(text: string) {
-  const element = document.querySelector("#preview-log");
+  const element: HTMLDivElement | null = document.querySelector("#preview-log");
 
   if (!element) return;
 
