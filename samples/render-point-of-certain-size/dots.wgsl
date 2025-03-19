@@ -1,17 +1,8 @@
-override offset: f32;
 override pointSize: f32;
+override opacity: f32;
 
 struct PointData {
   @location(0) position: vec2f,
-};
-
-struct Uniforms {
-  resolution: vec2f,
-};
-
-struct WindowSize {
-  width: f32,
-  height: f32,
 };
 
 struct VSOutput {
@@ -19,7 +10,7 @@ struct VSOutput {
   @location(0) color: vec4f,
 };
 
-@group(0) @binding(0) var<uniform> uni: Uniforms;
+@group(0) @binding(0) var<uniform> resolution: vec2f;
 
 @vertex fn vs(
     pointData: PointData,
@@ -63,16 +54,16 @@ struct VSOutput {
   var vsOut: VSOutput;
   let pos = points[index];
 
-  let _pos = (pointData.position + offset) / uni.resolution * 2.0;
+  let _pos = (pointData.position) / resolution;
 
-  vsOut.position = vec4f((_pos / .5 - 1.0) + pos * pointSize / uni.resolution, 0, 1);
+  vsOut.position = vec4f((_pos / .5 - 1.0) + pos * pointSize / resolution, 0, 1);
 
-  vsOut.color = vec4f(1, 1, 1, 1);
+  vsOut.color = vec4f(1, 1, 1, .5);
 
   let idx = instance_index;
 
   if (idx % 5 == 0) {
-    vsOut.color = vec4f(1, .5, 0, 1);
+    vsOut.color = vec4f(1, .5, 0, .5);
   }
 
   if (idx % 5 == 1 || idx % 5 == 2) {
@@ -86,5 +77,5 @@ struct VSOutput {
 }
 
 @fragment fn fs(vsOut: VSOutput) -> @location(0) vec4f {
-  return vsOut.color;
+  return vec4f(vsOut.color.xyz, opacity);
 }
