@@ -4,6 +4,7 @@ import { resolve } from "path";
 import generatePageTypesPlugin from "./vite-plugins/generate-page-types-plugin.js";
 import generateOutputPagesPlugin from "./vite-plugins/generate-output-pages-plugin.js";
 import copySampleFilesPlugin from "./vite-plugins/copy-sample-files-plugin.js";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 const directoryPath = "./samples";
 const base = "/web-gpu-experiments";
@@ -34,6 +35,6 @@ export default defineConfig({
       },
     },
   },
-  plugins: [generatePageTypesPlugin(), generateOutputPagesPlugin(), copySampleFilesPlugin()],
+  plugins: [tsconfigPaths(), generatePageTypesPlugin(), generateOutputPagesPlugin(), copySampleFilesPlugin()],
   base: base,
 });

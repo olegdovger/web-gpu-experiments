@@ -29,7 +29,35 @@ export default function createPipeline({
     fragment: {
       module: device.createShaderModule({ code: code }),
       entryPoint: "main_fragment",
-      targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+      targets: [
+        {
+          format: navigator.gpu.getPreferredCanvasFormat(),
+          blend: {
+            color: {
+              srcFactor: "one",
+              dstFactor: "one-minus-src-alpha",
+              operation: "add",
+            },
+            alpha: {
+              srcFactor: "one",
+              dstFactor: "one-minus-src-alpha",
+              operation: "add",
+            },
+          },
+          // blend: {
+          //   color: {
+          //     srcFactor: "src-alpha",
+          //     dstFactor: "one-minus-src-alpha",
+          //     operation: "add",
+          //   },
+          //   alpha: {
+          //     srcFactor: "one",
+          //     dstFactor: "zero",
+          //     operation: "add",
+          //   }
+          // },
+        },
+      ],
     },
   });
 

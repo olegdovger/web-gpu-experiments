@@ -1,4 +1,5 @@
 import commonSettings from "../common.settings.ts";
+import { invariant } from "../utils/invariant.ts";
 import WebGPUEngine, { EngineSettings, RenderFn } from "./WebGPUEngine.ts";
 
 class Sample {
@@ -8,7 +9,7 @@ class Sample {
   constructor(element: HTMLElement | null, settings?: EngineSettings) {
     const canvas = document.createElement("canvas");
 
-    if (!element) throw new Error("No element provided");
+    invariant(element, "No html element provided as parent one to 'canvas' element");
 
     element.appendChild(canvas);
     element.style.overflow = "hidden";
@@ -17,27 +18,11 @@ class Sample {
 
     this.settings = settings ?? commonSettings;
 
-    this.log("initialize");
-
     this.engine = new WebGPUEngine(canvas, this.settings);
   }
 
-  private log(...args: unknown[]) {
-    if (!this.settings?.log) return;
-
-    console.log("Chart:", ...args);
-  }
-
-  private error(...args: unknown[]) {
-    console.error("Chart:", ...args);
-  }
-
   async render(renderFunction: RenderFn) {
-    if (!renderFunction) {
-      this.error("No render function provided");
-
-      return;
-    }
+    invariant(renderFunction, "No render function provided");
 
     this.engine.render(async ({ device, context, width, height, font }) => {
       renderFunction({ device, context, width, height, font });
