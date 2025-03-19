@@ -2,16 +2,16 @@ import generatePoints from "~/utils/generatePoints.ts";
 import { invariant } from "~/utils/invariant.ts";
 import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 import setupDevice from "~/utils/setupDevice.ts";
-import computePointsShaderCode from "./compute.line.points.wgsl?raw";
-import linesShaderCode from "./lines.wgsl?raw";
+import dotsShaderCode from "./dots.wgsl?raw";
 import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver.ts";
 import { clearValue } from "../../src/constants.ts";
+import { getArrayStride } from "~/utils/getArrayStride.ts";
 
 // constants
-const LINE_TOLERANCE = 10 / window.devicePixelRatio; // px
-const NUMBER_OF_POINTS = 42; // 4_000_000 - max. Be careful with amount. Storage buffer binding size might be exceeded.
-const OFFSET = 50 / window.devicePixelRatio; // px
-const COLOR_OPACITY = 0.6;
+const POINT_SIZE = 4 / window.devicePixelRatio;
+const NUMBER_OF_POINTS = 5_000; // 4_000_000 - max. Be careful with amount. Storage buffer binding size might be exceeded.
+const OFFSET = 50 / window.devicePixelRatio;
+const COLOR_OPACITY = 0.7;
 
 invariant(navigator.gpu, "WebGPU has no support in browser");
 
@@ -21,20 +21,16 @@ const { device, format, context } = await setupDevice(canvas);
 
 context.configure({ device, format });
 
-const thicknessBuffer = device.createBuffer({
-  size: 4,
-  usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-});
-device.queue.writeBuffer(thicknessBuffer, 0, new Float32Array([LINE_TOLERANCE]));
-
 setCanvasResizeObserver(canvas, device, async () => {
   const canvasTexture = context.getCurrentTexture();
   // Points generator constants
-  const MIN_X = LINE_TOLERANCE + OFFSET;
-  const MIN_Y = LINE_TOLERANCE + OFFSET;
+  const MIN_X = POINT_SIZE + OFFSET;
+  const MIN_Y = POINT_SIZE + OFFSET;
 
   const MAX_X = canvas.width - MIN_X;
   const MAX_Y = canvas.height - MIN_Y;
+
+  console.log(MAX_X, MAX_Y);
 
   // Generate points
   const pointsArray = generatePoints({
@@ -49,39 +45,12 @@ setCanvasResizeObserver(canvas, device, async () => {
 
   const pointsBuffer = device.createBuffer({
     size: pointsArray.byteLength,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
   });
 
   device.queue.writeBuffer(pointsBuffer, 0, pointsArray);
 
-  const verticesBuffer = device.createBuffer({
-    size: 4 * (pointsBuffer.size - 4 * 2),
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-  });
-
-  const computePipeline = device.createComputePipeline({
-    layout: "auto",
-    compute: {
-      module: device.createShaderModule({ code: computePointsShaderCode }),
-      entryPoint: "main",
-    },
-  });
-
-  const bindComputePointsGroup = device.createBindGroup({
-    layout: computePipeline.getBindGroupLayout(0),
-    entries: [
-      { binding: 0, resource: { buffer: pointsBuffer } },
-      { binding: 1, resource: { buffer: verticesBuffer } },
-      { binding: 2, resource: { buffer: thicknessBuffer } },
-    ],
-  });
-
   const commandEncoder = device.createCommandEncoder();
-  const computePass = commandEncoder.beginComputePass();
-  computePass.setPipeline(computePipeline);
-  computePass.setBindGroup(0, bindComputePointsGroup);
-  computePass.dispatchWorkgroups(Math.ceil(pointsArray.length / 2 / 64));
-  computePass.end();
 
   const multisampleTexture = device.createTexture({
     format: canvasTexture.format,
@@ -117,7 +86,7 @@ setCanvasResizeObserver(canvas, device, async () => {
   const renderPass = commandEncoder.beginRenderPass(renderPassDescriptor);
   const module = device.createShaderModule({
     label: "lines shader",
-    code: linesShaderCode,
+    code: dotsShaderCode,
   });
 
   const renderPipeline = device.createRenderPipeline({
@@ -126,6 +95,16 @@ setCanvasResizeObserver(canvas, device, async () => {
     vertex: {
       module,
       entryPoint: "vs",
+      constants: {
+        pointSize: POINT_SIZE,
+      },
+      buffers: [
+        {
+          arrayStride: getArrayStride("float32x2"),
+          stepMode: "instance",
+          attributes: [{ shaderLocation: 0, offset: 0, format: "float32x2" }],
+        },
+      ],
     },
     fragment: {
       module,
@@ -133,30 +112,30 @@ setCanvasResizeObserver(canvas, device, async () => {
       targets: [
         {
           format: "bgra8unorm",
-          blend: {
-            color: {
-              operation: "add",
-              srcFactor: "src-alpha",
-              dstFactor: "one-minus-src-alpha",
-            },
-            alpha: {
-              operation: "add",
-              srcFactor: "zero",
-              dstFactor: "zero",
-            },
-          },
           // blend: {
           //   color: {
-          //     srcFactor: 'src-alpha',
-          //     dstFactor: 'one-minus-src-alpha',
-          //     operation: 'add'
+          //     operation: "add",
+          //     srcFactor: "src-alpha",
+          //     dstFactor: "one-minus-src-alpha",
           //   },
           //   alpha: {
-          //     srcFactor: 'one',
-          //     dstFactor: 'one-minus-src-alpha',
-          //     operation: 'add'
-          //   }
-          // }
+          //     operation: "add",
+          //     srcFactor: "zero",
+          //     dstFactor: "zero",
+          //   },
+          // },
+          blend: {
+            color: {
+              srcFactor: "src-alpha",
+              dstFactor: "one-minus-src-alpha",
+              operation: "add",
+            },
+            alpha: {
+              srcFactor: "one",
+              dstFactor: "one-minus-src-alpha",
+              operation: "add",
+            },
+          },
         },
       ],
       constants: {
@@ -179,42 +158,21 @@ setCanvasResizeObserver(canvas, device, async () => {
   renderPass.setPipeline(renderPipeline);
 
   const resolutionBuffer = device.createBuffer({
-    size: 8,
+    size: 4 * 2,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
 
   const bindRenderLinesGroup = device.createBindGroup({
     layout: renderPipeline.getBindGroupLayout(0),
-    entries: [
-      { binding: 0, resource: { buffer: resolutionBuffer } },
-      { binding: 1, resource: { buffer: verticesBuffer } },
-    ],
+    entries: [{ binding: 0, resource: { buffer: resolutionBuffer } }],
   });
 
   device.queue.writeBuffer(resolutionBuffer, 0, new Float32Array([canvasTexture.width, canvasTexture.height]));
 
+  renderPass.setVertexBuffer(0, pointsBuffer);
   renderPass.setBindGroup(0, bindRenderLinesGroup);
-  renderPass.draw(pointsBuffer.size / 2 - 4);
+  renderPass.draw(24, NUMBER_OF_POINTS);
   renderPass.end();
 
-  const show_generated_values = false;
-
-  const readbackBuffer = device.createBuffer({
-    size: verticesBuffer.size,
-    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-  });
-
-  if (show_generated_values) {
-    commandEncoder.copyBufferToBuffer(verticesBuffer, 0, readbackBuffer, 0, verticesBuffer.size);
-  }
-
   device.queue.submit([commandEncoder.finish()]);
-
-  if (show_generated_values) {
-    await readbackBuffer.mapAsync(GPUMapMode.READ);
-    const points = new Float32Array(readbackBuffer.getMappedRange());
-
-    console.log(points);
-    console.log(pointsArray);
-  }
 });

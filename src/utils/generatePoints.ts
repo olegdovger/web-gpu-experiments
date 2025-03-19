@@ -1,4 +1,4 @@
-import { GeneratePointsProps } from "../types.ts";
+import { GeneratePointsProps } from "../../samples/render-line-of-certain-thickness/types.ts";
 
 export default function generatePoints(props: GeneratePointsProps): Float32Array {
   const { maxCount, minX, maxX, minY, maxY } = props;

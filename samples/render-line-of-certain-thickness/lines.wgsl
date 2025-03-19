@@ -1,15 +1,5 @@
 override opacity: f32;
 
-struct WindowSize {
-  width: f32,
-  height: f32,
-};
-
-struct VSOutput {
-  @builtin(position) position: vec4f,
-  @location(0) color: vec4f,
-};
-
 @group(0) @binding(0) var<uniform> resolution: vec2f;
 @group(0) @binding(1) var<storage, read> points: array<f32>;
 
