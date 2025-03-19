@@ -10,5 +10,6 @@ export type PagePath =
   | "lines-and-text/index.html"
   | "msdf-font/index.html"
   | "plain-rectangle/index.html"
+  | "render-line-of-certain-thickness/index.html"
   | "rethink-high-level-api/index.html"
   | "top-left-coord-system/index.html";

@@ -1,5 +1,4 @@
 import commonSettings from "../../src/common.settings";
-import Plot from "../../src/components/Plot";
 import { Vec2 } from "../../src/fonts/ttf/math/Vec2";
 import { renderPass } from "../../src/renderers/baseRenderer";
 import createLineListPipeline from "../../src/renderers/pipelines/line-list.pipeline";
@@ -8,8 +7,9 @@ import shaderCoordLineCode from "./shader-coord-line.wgsl?raw";
 import makeVertexBuffer from "../../src/utils/makeVertexBuffer";
 import hexToGPUColorDict from "../../src/utils/hexToGPUColorDict.ts";
 import hexToGPUVec4f from "../../src/utils/hexToGPUVec4f.ts";
+import Sample from "../../src/components/Sample.ts";
 
-const plot = new Plot(document.getElementById("sample"), {
+const sample = new Sample(document.getElementById("sample"), {
   ...commonSettings,
   fontSource: "/web-gpu-experiments/fonts/JetBrainsMono-Regular.ttf",
   // fontSource: "/web-gpu-experiments/fonts/Inter.ttf",
@@ -17,7 +17,7 @@ const plot = new Plot(document.getElementById("sample"), {
   fontColorValue: hexToGPUColorDict("#a9a9a9"),
 });
 
-plot.render(async ({ device, context, font, width, height }) => {
+sample.render(async ({ device, context, font, width, height }) => {
   await renderPass(device, context, async () => {
     // 1. Compute data
     const bindGroupLayout = device.createBindGroupLayout({

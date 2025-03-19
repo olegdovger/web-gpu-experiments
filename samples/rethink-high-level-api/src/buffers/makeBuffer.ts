@@ -1,4 +1,4 @@
-import { invariant } from "../../../../src/utils/invariant";
+import { invariant } from "~/utils/invariant";
 
 export default function makeBuffer(device: GPUDevice, bufferSource: BufferSource | SharedArrayBuffer) {
   invariant(device, "No device");

@@ -1,5 +1,5 @@
 import { FontRenderer } from "../fonts/ttf/FontRenderer.ts";
-import { invariant } from "../utils/invariant.ts";
+import { invariant, tryGet } from "../utils/invariant.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
 import initFontRenderer, { LoadFontProps, LoadFontSettings } from "./WebGPUEngine/initFontRenderer.ts";
 
@@ -54,13 +54,12 @@ class WebGPUEngine {
 
   private async initialize(canvas: HTMLCanvasElement) {
     try {
-      const adapter = await navigator.gpu.requestAdapter({
-        powerPreference: "low-power",
-      });
-      if (!adapter) {
-        this.error("WebGPU adapter is not available.");
-        return;
-      }
+      const adapter = tryGet(
+        "GPUAdapter is not available.",
+        await navigator.gpu.requestAdapter({
+          powerPreference: "low-power",
+        }),
+      );
 
       const device = await adapter.requestDevice({
         requiredLimits: {
@@ -82,18 +81,14 @@ class WebGPUEngine {
 
       const context = canvas.getContext("webgpu");
 
-      if (!context) return;
+      invariant(context, "WebGPU context is not available.");
 
       this.context = context;
-
-      if (!context) {
-        this.error("WebGPU context is not available.");
-        return;
-      }
 
       context.configure({
         device: device,
         format: navigator.gpu.getPreferredCanvasFormat(),
+        alphaMode: "premultiplied",
       });
     } catch (e) {
       this.error("Error initializing WebGPU: ", e);

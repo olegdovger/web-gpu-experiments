@@ -20,7 +20,7 @@ fn main_vertex(
     var y = _y / .5 - 1.0;
 
     output.position = vec4f(x, y, 0.0, 1.0);
-    output.color = vec4f(0.0, 1.0, 0.0, 1.0);
+    output.color = vec4f(1.0, 0.0, 1.0, 0.1);
 
     return output;
 }

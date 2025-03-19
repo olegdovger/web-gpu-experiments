@@ -1,3 +1,5 @@
+import { getArrayStride } from "~/utils/getArrayStride.ts";
+
 export default function makeRenderPipeline({
   device,
   format,
@@ -18,7 +20,7 @@ export default function makeRenderPipeline({
       entryPoint: "vertex_main",
       buffers: [
         {
-          arrayStride: 8,
+          arrayStride: getArrayStride("float32x2"),
           attributes: [
             {
               shaderLocation: 0,

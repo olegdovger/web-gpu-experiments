@@ -29,7 +29,8 @@
     "prettier": "github:prettier/prettier",
     "prettier-eslint": "^16.3.0",
     "typescript": "5.7.3",
-    "vite": "6.1.1"
+    "vite": "6.1.1",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
     "typegpu": "0.4.3",
