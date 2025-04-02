@@ -12,5 +12,6 @@ export type PagePath =
   | "plain-rectangle/index.html"
   | "render-line-of-certain-thickness/index.html"
   | "render-point-of-certain-size/index.html"
+  | "render-svg/index.html"
   | "rethink-high-level-api/index.html"
   | "top-left-coord-system/index.html";

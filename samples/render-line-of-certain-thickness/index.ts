@@ -5,13 +5,13 @@ import setupDevice from "~/utils/setupDevice.ts";
 import computePointsShaderCode from "./compute.line.points.wgsl?raw";
 import linesShaderCode from "./lines.wgsl?raw";
 import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver.ts";
-import { clearValue } from "../../src/constants.ts";
+import { clearValue } from "~/constants.ts";
 
 // constants
 const LINE_TOLERANCE = 10 / window.devicePixelRatio; // px
 const NUMBER_OF_POINTS = 42; // 4_000_000 - max. Be careful with amount. Storage buffer binding size might be exceeded.
 const OFFSET = 50 / window.devicePixelRatio; // px
-const COLOR_OPACITY = 0.6;
+const lineColor = [0.5, 0.8, 0.5, 0.5];
 
 invariant(navigator.gpu, "WebGPU has no support in browser");
 
@@ -20,12 +20,6 @@ const canvas = getCanvasElement("sample");
 const { device, format, context } = await setupDevice(canvas);
 
 context.configure({ device, format });
-
-const thicknessBuffer = device.createBuffer({
-  size: 4,
-  usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-});
-device.queue.writeBuffer(thicknessBuffer, 0, new Float32Array([LINE_TOLERANCE]));
 
 setCanvasResizeObserver(canvas, device, async () => {
   const canvasTexture = context.getCurrentTexture();
@@ -64,6 +58,9 @@ setCanvasResizeObserver(canvas, device, async () => {
     compute: {
       module: device.createShaderModule({ code: computePointsShaderCode }),
       entryPoint: "main",
+      constants: {
+        thickness: LINE_TOLERANCE,
+      },
     },
   });
 
@@ -72,7 +69,6 @@ setCanvasResizeObserver(canvas, device, async () => {
     entries: [
       { binding: 0, resource: { buffer: pointsBuffer } },
       { binding: 1, resource: { buffer: verticesBuffer } },
-      { binding: 2, resource: { buffer: thicknessBuffer } },
     ],
   });
 
@@ -145,23 +141,8 @@ setCanvasResizeObserver(canvas, device, async () => {
               dstFactor: "zero",
             },
           },
-          // blend: {
-          //   color: {
-          //     srcFactor: 'src-alpha',
-          //     dstFactor: 'one-minus-src-alpha',
-          //     operation: 'add'
-          //   },
-          //   alpha: {
-          //     srcFactor: 'one',
-          //     dstFactor: 'one-minus-src-alpha',
-          //     operation: 'add'
-          //   }
-          // }
         },
       ],
-      constants: {
-        opacity: COLOR_OPACITY,
-      },
     },
     multisample: {
       count: 4,
@@ -183,11 +164,19 @@ setCanvasResizeObserver(canvas, device, async () => {
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
 
+  const colorBuffer = device.createBuffer({
+    size: 4 * 4,
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  });
+
+  device.queue.writeBuffer(colorBuffer, 0, new Float32Array(lineColor));
+
   const bindRenderLinesGroup = device.createBindGroup({
     layout: renderPipeline.getBindGroupLayout(0),
     entries: [
       { binding: 0, resource: { buffer: resolutionBuffer } },
       { binding: 1, resource: { buffer: verticesBuffer } },
+      { binding: 2, resource: { buffer: colorBuffer } },
     ],
   });
 
