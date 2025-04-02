@@ -3,7 +3,7 @@ import { Store } from "./Store";
 import { clearValue } from "~/constants";
 import setupDevice from "~/utils/setupDevice";
 import { PolylineRenderer } from "./renderers/PolylineRenderer";
-import { GridRenderer, GridOptions } from "./renderers/GridRenderer";
+import { GridRenderer } from "./renderers/GridRenderer";
 
 export interface RendererOptions {
   multisampled: boolean;

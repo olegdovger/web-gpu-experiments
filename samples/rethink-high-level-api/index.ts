@@ -1,7 +1,6 @@
 import { getCanvasElement } from "~/utils/getCanvasElement";
 import { invariant } from "~/utils/invariant.ts";
 import { Renderer } from "./src/Renderer";
-import { Store } from "./src/Store";
 
 invariant(navigator.gpu, "WebGPU is not supported");
 

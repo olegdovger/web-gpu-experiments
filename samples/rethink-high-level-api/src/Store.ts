@@ -35,8 +35,6 @@ type UpdateOptions = AddOptions & { id: string };
 type PrimitiveCallback = () => void;
 
 export class Store {
-  private static instance: Store;
-
   private primitives: Map<string, StorePrimitive> = new Map();
   private primitivesByType: Map<StorePrimitiveType, Set<string>> = new Map();
   private dirtyPrimitives: Set<string> = new Set();
