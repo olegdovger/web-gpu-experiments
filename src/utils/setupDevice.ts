@@ -1,5 +1,5 @@
-import { getAdapter } from "../../samples/rethink-high-level-api/src/getAdapter.ts";
-import { getCanvasContext } from "../../samples/rethink-high-level-api/src/getCanvasContext.ts";
+import { getAdapter } from "./getAdapter.ts";
+import { getCanvasContext } from "./getCanvasContext.ts";
 
 interface DeviceSetup {
   device: GPUDevice;

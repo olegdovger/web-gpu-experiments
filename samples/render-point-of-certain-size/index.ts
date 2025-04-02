@@ -17,7 +17,7 @@ invariant(navigator.gpu, "WebGPU has no support in browser");
 
 const canvas = getCanvasElement("sample");
 
-const { device, format, context } = await setupDevice(canvas);
+const { context, device, format } = await setupDevice(canvas);
 
 context.configure({ device, format });
 

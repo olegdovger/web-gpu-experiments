@@ -1,84 +1,39 @@
+import { getCanvasElement } from "~/utils/getCanvasElement";
 import { invariant } from "~/utils/invariant.ts";
-import makeBuffer from "./src/buffers/makeBuffer.ts";
-import setupDevice from "~/utils/setupDevice.ts";
-import makeRenderPipeline from "./src/makeRenderPipeline.ts";
-import shaderCode from "./shader.wgsl?raw";
-import { getCanvasElement } from "~/utils/getCanvasElement.ts";
-import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver.ts";
+import { Renderer } from "./src/Renderer";
+import { Store } from "./src/Store";
 
-/*
-
-- accessToGPUDevice()
-- accessToCanvas()
-
-- buildCommandEncoder()
-- buildPassEncoder()
-
-- buildShader()
-- buildPipeline()
-
-*/
-
-const vertices = new Float32Array([
-  0.0,
-  0.0, // Point 1
-  0.0,
-  1.0, // Point 2
-  1.0,
-  0.0, // Point 3
-  0.0,
-  0.0, // Point 1
-]);
-
-invariant(navigator.gpu, "WebGPU has no support in browser");
+invariant(navigator.gpu, "WebGPU is not supported");
 
 const canvas = getCanvasElement("sample");
 
-const { device, format, context } = await setupDevice(canvas);
+// Initialize the renderer with a single device
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const renderer = await Renderer.init(canvas, {
+  multisampled: true,
+  depthFormat: "depth24plus",
+  clearColor: { r: 0.15, g: 0.15, b: 0.15, a: 1.0 },
+});
 
-context.configure({ device, format });
+// Create a simple polyline example
+const store = renderer.getStore();
 
-setCanvasResizeObserver(canvas, device);
+// Create a polyline with 5 points in a zigzag pattern
+const polylineData = [50, 50, 450, 50, 450, 450, 50, 450, 50, 50];
+const polylineData2 = polylineData.map((value) => value + 50);
 
-const textureView = context.getCurrentTexture().createView();
+// Register the polyline with the store
+store.add({
+  type: "polyline",
+  data: polylineData,
+  color: "#00FF00",
+  thickness: 5,
+});
 
-const renderPassDescriptor: GPURenderPassDescriptor = {
-  colorAttachments: [
-    {
-      view: textureView,
-      loadOp: "clear",
-      clearValue: { r: 0.5, g: 0.5, b: 0.1, a: 1.0 },
-      storeOp: "store",
-    },
-  ],
-};
-
-const frame = async () => {
-  const colorAttachments = [...renderPassDescriptor.colorAttachments];
-
-  invariant(colorAttachments, "No colorAttachments specified");
-
-  const colorAttachment = colorAttachments[0];
-
-  invariant(colorAttachment, "No colorAttachment specified");
-
-  colorAttachment.view = context.getCurrentTexture().createView();
-
-  const commandEncoder = device.createCommandEncoder();
-
-  const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-  const pipeline = makeRenderPipeline({ device, format, code: shaderCode });
-  passEncoder.setPipeline(pipeline);
-
-  const vertexBuffer = makeBuffer(device, vertices);
-  passEncoder.setVertexBuffer(0, vertexBuffer);
-
-  passEncoder.draw(Math.ceil(vertices.length / 2));
-  passEncoder.end();
-
-  device.queue.submit([commandEncoder.finish()]);
-
-  requestAnimationFrame(frame);
-};
-
-await frame();
+// Register the polyline with the store
+store.add({
+  type: "polyline",
+  data: polylineData2,
+  color: "#FF0000",
+  thickness: 5,
+});

@@ -5,7 +5,6 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-
     /* Bundler mode */
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -19,11 +18,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-
     "types": ["vite/client", "@webgpu/types"],
-
     "paths": {
-      "~/utils/*": ["./src/utils/*"]
+      "~/utils/*": ["./src/utils/*"],
+      "~/*": ["./src/*"]
     }
   },
   "include": [
