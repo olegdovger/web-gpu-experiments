@@ -3,7 +3,7 @@ import { clearValue } from "../constants";
 export async function renderPass(
   device: GPUDevice,
   context: GPUCanvasContext,
-  execute: (passEncoder: GPURenderPassEncoder, commandEncoder: GPUCommandEncoder) => Promise<void>,
+  execute: (passEncoder: GPURenderPassEncoder, commandEncoder: GPUCommandEncoder) => Promise<void> | void,
 ) {
   const view = context.getCurrentTexture().createView();
 

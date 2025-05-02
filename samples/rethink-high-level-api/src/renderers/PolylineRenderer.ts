@@ -124,13 +124,13 @@ export class PolylineRenderer {
         multisample: {
           count: this.sampleCount,
         },
-        primitive: {
-          topology: thickness > 1 ? "triangle-strip" : "line-strip",
-        },
         depthStencil: {
           depthWriteEnabled: true,
           depthCompare: "always",
           format: "depth24plus",
+        },
+        primitive: {
+          topology: thickness > 1 ? "triangle-strip" : "line-strip",
         },
       });
 

@@ -1,5 +1,7 @@
 export type PagePath =
+  | "animation-demo/index.html"
   | "bottom-left-coord-system/index.html"
+  | "dpdx-demo/index.html"
   | "external-data/index.html"
   | "fixed-size/index.html"
   | "font/index.html"

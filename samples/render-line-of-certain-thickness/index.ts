@@ -4,7 +4,7 @@ import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 import setupDevice from "~/utils/setupDevice.ts";
 import computePointsShaderCode from "./compute.line.points.wgsl?raw";
 import linesShaderCode from "./lines.wgsl?raw";
-import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver.ts";
+import setResizeObserver from "~/utils/setResizeObserver";
 import { clearValue } from "~/constants.ts";
 
 // constants
@@ -21,7 +21,7 @@ const { device, format, context } = await setupDevice(canvas);
 
 context.configure({ device, format });
 
-setCanvasResizeObserver(canvas, device, async () => {
+setResizeObserver(canvas, device, async () => {
   const canvasTexture = context.getCurrentTexture();
   // Points generator constants
   const MIN_X = LINE_TOLERANCE + OFFSET;
