@@ -17,7 +17,7 @@ class ElementSizeWatcher {
     debounceInterval: number = 100,
     callback: (width: number, height: number) => void,
   ) {
-    const element = canvas.parentElement;
+    const element = canvas.parentElement?.parentElement;
 
     const _debounceInterval = debounceInterval < 100 ? 100 : debounceInterval;
 
@@ -28,6 +28,11 @@ class ElementSizeWatcher {
 
         const width = entry.contentBoxSize[0].inlineSize;
         const height = entry.contentBoxSize[0].blockSize;
+
+        if (canvas.parentElement) {
+          canvas.parentElement.style.width = `${width}px`;
+          canvas.parentElement.style.height = `${height}px`;
+        }
 
         callback(width, height);
       }),

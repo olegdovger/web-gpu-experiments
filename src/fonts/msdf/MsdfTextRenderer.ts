@@ -1,148 +1,40 @@
-import { mat4, Mat4 } from "wgpu-matrix";
-
 import shader from "./shaders/text.shader.wgsl?raw";
-import tgpu from "typegpu";
-
-// The kerning map stores a spare map of character ID pairs with an associated
-// X offset that should be applied to the character spacing when the second
-// character ID is rendered after the first.
-type FirstKerning = number;
-type SecondKerning = number;
-type Amount = number;
-
-type KerningMap = Map<FirstKerning, Map<SecondKerning, Amount>>;
-
-interface MsdfChar {
-  id: number;
-  index: number;
-  char: string;
-  width: number;
-  height: number;
-  xoffset: number;
-  yofsset: number;
-  xadvance: number;
-  chnl: number;
-  x: number;
-  y: number;
-  page: number;
-  charIndex: number;
-}
-
-export class MsdfFont {
-  charCount: number;
-  defaultChar: MsdfChar;
-  constructor(
-    public pipeline: GPURenderPipeline,
-    public bindGroup: GPUBindGroup,
-    public lineHeight: number,
-    public chars: { [x: number]: MsdfChar },
-    public kernings: KerningMap,
-  ) {
-    const charArray = Object.values(chars);
-    this.charCount = charArray.length;
-    this.defaultChar = charArray[0];
-  }
-
-  getChar(charCode: number): MsdfChar {
-    let char = this.chars[charCode];
-    if (!char) {
-      char = this.defaultChar;
-    }
-    return char;
-  }
-
-  // Gets the distance in pixels a line should advance for a given character code. If the upcoming
-  // character code is given any kerning between the two characters will be taken into account.
-  getXAdvance(charCode: number, nextCharCode: number = -1): number {
-    const char = this.getChar(charCode);
-    if (nextCharCode >= 0) {
-      const kerning = this.kernings.get(charCode);
-      if (kerning) {
-        return char.xadvance + (kerning.get(nextCharCode) ?? 0);
-      }
-    }
-    return char.xadvance;
-  }
-}
-
-export interface MsdfTextMeasurements {
-  width: number;
-  height: number;
-  lineWidths: number[];
-  printedCharCount: number;
-}
-
-export class MsdfText {
-  private bufferArray = new Float32Array(24);
-  private bufferArrayDirty = true;
-
-  constructor(
-    public device: GPUDevice,
-    private renderBundle: GPURenderBundle,
-    public measurements: MsdfTextMeasurements,
-    public font: MsdfFont,
-    public textBuffer: GPUBuffer,
-  ) {
-    mat4.identity(this.bufferArray);
-    this.setColor(1, 1, 1, 1);
-    this.setPixelScale(1 / 512);
-    this.bufferArrayDirty = true;
-  }
-
-  getRenderBundle() {
-    if (this.bufferArrayDirty) {
-      this.bufferArrayDirty = false;
-      this.device.queue.writeBuffer(this.textBuffer, 0, this.bufferArray, 0, this.bufferArray.length);
-    }
-    return this.renderBundle;
-  }
-
-  setTransform(matrix: Mat4) {
-    mat4.copy(matrix, this.bufferArray);
-    this.bufferArrayDirty = true;
-  }
-
-  setColor(r: number, g: number, b: number, a: number = 1.0) {
-    this.bufferArray[16] = r;
-    this.bufferArray[17] = g;
-    this.bufferArray[18] = b;
-    this.bufferArray[19] = a;
-    this.bufferArrayDirty = true;
-  }
-
-  setPixelScale(pixelScale: number) {
-    this.bufferArray[20] = pixelScale;
-    this.bufferArrayDirty = true;
-  }
-}
+import { FontArtefacts, MsdfChar, MsdfTextMeasurements } from "./types";
+import { MsdfFont } from "./MsdfFont";
+import { MsdfText } from "./MsdfText";
+import { Mat4 } from "wgpu-matrix";
 
 interface MsdfTextFormattingOptions {
   centered?: boolean;
   pixelScale?: number;
-  fontSize?: number; // Новый параметр для размера в пикселях
+  fontSize?: number;
   color?: [number, number, number, number];
 }
 
-export class MsdfTextRenderer {
+export default class MsdfTextRenderer {
   fontBindGroupLayout: GPUBindGroupLayout;
   textBindGroupLayout: GPUBindGroupLayout;
-  pipelinePromise: Promise<GPURenderPipeline>;
+  pipeline: GPURenderPipeline;
   sampler: GPUSampler;
   cameraUniformBuffer: GPUBuffer;
+  device: GPUDevice;
+  sampleCount: number;
 
   renderBundleDescriptor: GPURenderBundleEncoderDescriptor;
   cameraArray: Float32Array = new Float32Array(16 * 2);
 
   constructor(
-    public root: Awaited<ReturnType<typeof tgpu.init>>,
+    device: GPUDevice,
     colorFormat: GPUTextureFormat,
     depthFormat: GPUTextureFormat,
+    sampleCount: number = 1,
   ) {
-    const device = root.device;
-
+    this.device = device;
+    this.sampleCount = sampleCount;
     this.renderBundleDescriptor = {
       colorFormats: [colorFormat],
       depthStencilFormat: depthFormat,
+      sampleCount,
     };
 
     this.sampler = device.createSampler({
@@ -201,7 +93,7 @@ export class MsdfTextRenderer {
       code: shader,
     });
 
-    this.pipelinePromise = device.createRenderPipelineAsync({
+    this.pipeline = device.createRenderPipeline({
       label: `msdf text pipeline`,
       layout: device.createPipelineLayout({
         bindGroupLayouts: [this.fontBindGroupLayout, this.textBindGroupLayout],
@@ -238,40 +130,17 @@ export class MsdfTextRenderer {
         depthCompare: "less",
         format: depthFormat,
       },
+      multisample: {
+        count: sampleCount,
+      },
     });
   }
 
-  async loadTexture(url: string) {
-    const response = await fetch(url);
-    const imageBitmap = await createImageBitmap(await response.blob());
-
-    const texture = this.root.device.createTexture({
-      label: `MSDF font texture ${url}`,
-      size: [imageBitmap.width, imageBitmap.height, 1],
-      format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    this.root.device.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, [
-      imageBitmap.width,
-      imageBitmap.height,
-    ]);
-    return texture;
-  }
-
-  async createFont(fontJsonUrl: string): Promise<MsdfFont> {
-    const response = await fetch(fontJsonUrl);
-    const json = await response.json();
-
-    const i = fontJsonUrl.lastIndexOf("/");
-    const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
-
-    const pagePromises = [];
-    for (const pageUrl of json.pages) {
-      pagePromises.push(this.loadTexture(baseUrl + pageUrl));
-    }
+  createFont(fontArtefacts: FontArtefacts): MsdfFont {
+    const { json, pageTextures, kernings } = fontArtefacts;
 
     const charCount = json.chars.length;
-    const charsBuffer = this.root.device.createBuffer({
+    const charsBuffer = this.device.createBuffer({
       label: "MSDF character layout buffer",
       size: charCount * Float32Array.BYTES_PER_ELEMENT * 8,
       usage: GPUBufferUsage.STORAGE,
@@ -302,9 +171,7 @@ export class MsdfTextRenderer {
 
     charsBuffer.unmap();
 
-    const pageTextures = await Promise.all(pagePromises);
-
-    const bindGroup = this.root.device.createBindGroup({
+    const bindGroup = this.device.createBindGroup({
       label: "msdf font bind group",
       layout: this.fontBindGroupLayout,
       entries: [
@@ -324,24 +191,11 @@ export class MsdfTextRenderer {
       ],
     });
 
-    const kernings = new Map();
-
-    if (json.kernings) {
-      for (const kearning of json.kernings) {
-        let charKerning = kernings.get(kearning.first);
-        if (!charKerning) {
-          charKerning = new Map<number, number>();
-          kernings.set(kearning.first, charKerning);
-        }
-        charKerning.set(kearning.second, kearning.amount);
-      }
-    }
-
-    return new MsdfFont(await this.pipelinePromise, bindGroup, json.common.lineHeight, chars, kernings);
+    return new MsdfFont(this.pipeline, bindGroup, json.common.lineHeight, chars, kernings);
   }
 
   formatText(font: MsdfFont, text: string, options: MsdfTextFormattingOptions = {}): MsdfText {
-    const textBuffer = this.root.device.createBuffer({
+    const textBuffer = this.device.createBuffer({
       label: "msdf text buffer",
       size: (6 + text.length) * Float32Array.BYTES_PER_ELEMENT * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -374,7 +228,7 @@ export class MsdfTextRenderer {
 
     textBuffer.unmap();
 
-    const bindGroup = this.root.device.createBindGroup({
+    const bindGroup = this.device.createBindGroup({
       label: "msdf text bind group",
       layout: this.textBindGroupLayout,
       entries: [
@@ -389,18 +243,24 @@ export class MsdfTextRenderer {
       ],
     });
 
-    const encoder = this.root.device.createRenderBundleEncoder(this.renderBundleDescriptor);
+    const encoder = this.device.createRenderBundleEncoder(this.renderBundleDescriptor);
     encoder.setPipeline(font.pipeline);
     encoder.setBindGroup(0, font.bindGroup);
     encoder.setBindGroup(1, bindGroup);
     encoder.draw(4, measurements.printedCharCount);
     const renderBundle = encoder.finish();
 
-    const msdfText = new MsdfText(this.root.device, renderBundle, measurements, font, textBuffer);
+    const msdfText = new MsdfText(this.device, renderBundle, measurements, font, textBuffer);
 
-    options.pixelScale ??= 1 / 512;
-
-    msdfText.setPixelScale(options.pixelScale);
+    // Calculate scale based on font size in pixels
+    if (options.fontSize !== undefined) {
+      const baseFontSize = font.lineHeight;
+      const scale = options.fontSize / baseFontSize;
+      msdfText.setPixelScale(scale);
+    } else {
+      options.pixelScale ??= 1 / 512;
+      msdfText.setPixelScale(options.pixelScale);
+    }
 
     if (options.color !== undefined) {
       msdfText.setColor(...options.color);
@@ -464,11 +324,12 @@ export class MsdfTextRenderer {
   updateCamera(projection: Mat4, view: Mat4) {
     this.cameraArray.set(projection, 0);
     this.cameraArray.set(view, 16);
-    this.root.device.queue.writeBuffer(this.cameraUniformBuffer, 0, this.cameraArray);
+    this.device.queue.writeBuffer(this.cameraUniformBuffer, 0, this.cameraArray);
   }
 
   render(renderPass: GPURenderPassEncoder, ...text: MsdfText[]) {
     const renderBundles = text.map((t) => t.getRenderBundle());
+
     renderPass.executeBundles(renderBundles);
   }
 }

@@ -1,4 +1,4 @@
-import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver";
+import setResizeObserver from "~/utils/setResizeObserver";
 import { Store } from "./Store";
 import { clearValue } from "~/constants";
 import setupDevice from "~/utils/setupDevice";
@@ -51,7 +51,7 @@ export class Renderer {
     this.gridRenderer = new GridRenderer(this.device, this.format, sampleCount);
 
     this.store.subscribe(this.render.bind(this));
-    setCanvasResizeObserver(this.canvas, this.device, this.render.bind(this));
+    setResizeObserver(this.canvas, this.device, this.render.bind(this));
   }
 
   public static async setup(canvas: HTMLCanvasElement) {

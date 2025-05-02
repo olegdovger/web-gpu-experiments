@@ -25,14 +25,14 @@ const polylineData2 = polylineData.map((value) => value + 50);
 store.add({
   type: "polyline",
   data: polylineData,
-  color: "#00FF00",
-  thickness: 5,
+  color: "#00FF0055",
+  thickness: 50,
 });
 
 // Register the polyline with the store
 store.add({
   type: "polyline",
   data: polylineData2,
-  color: "#FF0000",
-  thickness: 5,
+  color: "#FF000055",
+  thickness: 50,
 });

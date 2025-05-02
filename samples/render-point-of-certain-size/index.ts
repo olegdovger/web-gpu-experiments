@@ -3,7 +3,7 @@ import { invariant } from "~/utils/invariant.ts";
 import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 import setupDevice from "~/utils/setupDevice.ts";
 import dotsShaderCode from "./dots.wgsl?raw";
-import setCanvasResizeObserver from "~/utils/setCanvasResizeObserver.ts";
+import setResizeObserver from "~/utils/setResizeObserver.ts";
 import { clearValue } from "../../src/constants.ts";
 import { getArrayStride } from "~/utils/getArrayStride.ts";
 
@@ -21,7 +21,7 @@ const { context, device, format } = await setupDevice(canvas);
 
 context.configure({ device, format });
 
-setCanvasResizeObserver(canvas, device, async () => {
+setResizeObserver(canvas, device, async () => {
   const canvasTexture = context.getCurrentTexture();
   // Points generator constants
   const MIN_X = POINT_SIZE + OFFSET;

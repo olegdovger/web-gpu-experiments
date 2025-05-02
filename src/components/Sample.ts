@@ -7,14 +7,16 @@ class Sample {
   private settings: EngineSettings;
 
   constructor(element: HTMLElement | null, settings?: EngineSettings) {
+    const parentElement = document.createElement("div");
     const canvas = document.createElement("canvas");
 
     invariant(element, "No html element provided as parent one to 'canvas' element");
 
-    element.appendChild(canvas);
-    element.style.overflow = "hidden";
-    element.style.width = "100%";
-    element.style.height = "100%";
+    element.appendChild(parentElement);
+    parentElement.appendChild(canvas);
+    parentElement.style.overflow = "hidden";
+    parentElement.style.width = element.getBoundingClientRect().width + "px";
+    parentElement.style.height = element.getBoundingClientRect().height + "px";
 
     this.settings = settings ?? commonSettings;
 
