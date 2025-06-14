@@ -1,5 +1,5 @@
 import commonSettings from "../common.settings.ts";
-import { invariant } from "../utils/invariant.ts";
+import { assert } from "../utils/assert.ts";
 import WebGPUEngine, { EngineSettings, RenderFn } from "./WebGPUEngine.ts";
 
 class Sample {
@@ -10,7 +10,7 @@ class Sample {
     const parentElement = document.createElement("div");
     const canvas = document.createElement("canvas");
 
-    invariant(element, "No html element provided as parent one to 'canvas' element");
+    assert(element, "No html element provided as parent one to 'canvas' element");
 
     element.appendChild(parentElement);
     parentElement.appendChild(canvas);
@@ -24,7 +24,7 @@ class Sample {
   }
 
   async render(renderFunction: RenderFn) {
-    invariant(renderFunction, "No render function provided");
+    assert(renderFunction, "No render function provided");
 
     this.engine.render(async ({ device, context, width, height, font }) => {
       renderFunction({ device, context, width, height, font });

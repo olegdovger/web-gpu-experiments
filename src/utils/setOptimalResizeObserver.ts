@@ -1,4 +1,4 @@
-import { invariant } from "./invariant";
+import { assert } from "./assert";
 
 export default function setOptimalResizeObserver(canvas: HTMLCanvasElement, device: GPUDevice, render?: () => void) {
   const parentElement = canvas.parentElement;
@@ -12,7 +12,7 @@ export default function setOptimalResizeObserver(canvas: HTMLCanvasElement, devi
   const observer = new ResizeObserver((entries) => {
     const pixelBoxSize = entries[0].devicePixelContentBoxSize?.[0];
 
-    invariant(pixelBoxSize, "pixelBoxSize is not defined");
+    assert(pixelBoxSize, "pixelBoxSize is not defined");
 
     for (const entry of entries) {
       const { inlineSize, blockSize } = entry.contentBoxSize[0];

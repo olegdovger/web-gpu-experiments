@@ -1,8 +1,8 @@
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert";
 import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 // import setupDevice from "~/utils/setupDevice.ts";
 
-invariant(navigator.gpu, "WebGPU has no support in browser");
+assert(navigator.gpu, "WebGPU has no support in browser");
 
 const canvas = getCanvasElement("sample");
 
@@ -13,7 +13,7 @@ const canvas = getCanvasElement("sample");
 const image = new Image();
 const ctx = canvas.getContext("2d");
 
-invariant(ctx, "ctx is empty");
+assert(ctx, "ctx is empty");
 // Wait for the sprite sheet to load
 
 image.onload = async () => {

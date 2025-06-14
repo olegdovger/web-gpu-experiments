@@ -3,14 +3,32 @@ import { MsdfChar, KerningMap } from "./types";
 export class MsdfFont {
   charCount: number;
   defaultChar: MsdfChar;
-  constructor(
-    public pipeline: GPURenderPipeline,
-    public bindGroup: GPUBindGroup,
-    public lineHeight: number,
-    public chars: { [x: number]: MsdfChar },
-    public kernings: KerningMap,
-  ) {
-    const charArray = Object.values(chars);
+  public pipeline: GPURenderPipeline;
+  public bindGroup: GPUBindGroup;
+  public lineHeight: number;
+  public lineBase: number;
+  public size: number;
+  public chars: { [x: number]: MsdfChar };
+  public kernings: KerningMap;
+
+  constructor(options: {
+    pipeline: GPURenderPipeline;
+    bindGroup: GPUBindGroup;
+    lineHeight: number;
+    lineBase: number;
+    chars: { [x: number]: MsdfChar };
+    kernings: KerningMap;
+    size: number;
+  }) {
+    this.pipeline = options.pipeline;
+    this.bindGroup = options.bindGroup;
+    this.lineHeight = options.lineHeight;
+    this.lineBase = options.lineBase;
+    this.chars = options.chars;
+    this.kernings = options.kernings;
+    this.size = options.size;
+
+    const charArray = Object.values(this.chars);
     this.charCount = charArray.length;
     this.defaultChar = charArray[0];
   }

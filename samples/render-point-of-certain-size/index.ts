@@ -1,5 +1,5 @@
 import generatePoints from "~/utils/generatePoints.ts";
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert.ts";
 import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 import setupDevice from "~/utils/setupDevice.ts";
 import dotsShaderCode from "./dots.wgsl?raw";
@@ -13,7 +13,7 @@ const NUMBER_OF_POINTS = 5_000; // 4_000_000 - max. Be careful with amount. Stor
 const OFFSET = 50 / window.devicePixelRatio;
 const COLOR_OPACITY = 0.7;
 
-invariant(navigator.gpu, "WebGPU has no support in browser");
+assert(navigator.gpu, "WebGPU has no support in browser");
 
 const canvas = getCanvasElement("sample");
 

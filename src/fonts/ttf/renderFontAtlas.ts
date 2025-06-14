@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { Lookups } from "./prepareLookups.ts";
 import { toSDF } from "./toSDF.ts";
 
@@ -41,7 +41,7 @@ export async function renderFontAtlas(
   canvas.height = lookups.atlas.height;
 
   const context = canvas.getContext("2d");
-  invariant(context, "Could not get 2D context.");
+  assert(context, "Could not get 2D context.");
 
   const scale = (1 / lookups.unitsPerEm) * ATLAS_FONT_SIZE;
 

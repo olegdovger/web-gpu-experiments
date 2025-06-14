@@ -1,10 +1,10 @@
+import { assert } from "~/utils/assert";
+
 export const setupCanvas = (canvas: HTMLCanvasElement) => {
   // make canvas parent element with width of 100% and height of 100% and overflow hidden
   const parentElement = canvas.parentElement;
 
-  if (!parentElement) {
-    throw new Error("Canvas parent element not found");
-  }
+  assert(parentElement, "Canvas parent element not found");
 
   const newParentElement = document.createElement("div");
 

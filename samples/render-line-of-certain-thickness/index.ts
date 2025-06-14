@@ -1,5 +1,5 @@
 import generatePoints from "~/utils/generatePoints.ts";
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert";
 import { getCanvasElement } from "~/utils/getCanvasElement.ts";
 import setupDevice from "~/utils/setupDevice.ts";
 import computePointsShaderCode from "./compute.line.points.wgsl?raw";
@@ -13,7 +13,7 @@ const NUMBER_OF_POINTS = 42; // 4_000_000 - max. Be careful with amount. Storage
 const OFFSET = 50 / window.devicePixelRatio; // px
 const lineColor = [0.5, 0.8, 0.5, 0.5];
 
-invariant(navigator.gpu, "WebGPU has no support in browser");
+assert(navigator.gpu, "WebGPU has no support in browser");
 
 const canvas = getCanvasElement("sample");
 

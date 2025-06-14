@@ -2,39 +2,77 @@ import shader from "./shaders/text.shader.wgsl?raw";
 import { FontArtefacts, MsdfChar, MsdfTextMeasurements } from "./types";
 import { MsdfFont } from "./MsdfFont";
 import { MsdfText } from "./MsdfText";
-import { Mat4 } from "wgpu-matrix";
+import { mat4, Mat4 } from "wgpu-matrix";
+import { fetchFontArtefacts } from "./utils/fetchFontArtefacts";
+import { assert } from "~/utils/assert";
+import hexToGPUVec4f from "~/utils/hexToGPUVec4f";
+import { ortho } from "~/utils/ortho";
+import debugRectShader from "./shaders/debugRect.wgsl?raw";
 
 interface MsdfTextFormattingOptions {
   centered?: boolean;
-  pixelScale?: number;
   fontSize?: number;
-  color?: [number, number, number, number];
+  color?: string;
+  offsetTop?: number;
+  offsetLeft?: number;
 }
 
 export default class MsdfTextRenderer {
   fontBindGroupLayout: GPUBindGroupLayout;
   textBindGroupLayout: GPUBindGroupLayout;
+  canvasSizeBindGroupLayout: GPUBindGroupLayout;
+
   pipeline: GPURenderPipeline;
   sampler: GPUSampler;
   cameraUniformBuffer: GPUBuffer;
   device: GPUDevice;
+  canvas: HTMLCanvasElement;
+  context: GPUCanvasContext;
+
   sampleCount: number;
+
+  texts: Set<MsdfText> = new Set();
 
   renderBundleDescriptor: GPURenderBundleEncoderDescriptor;
   cameraArray: Float32Array = new Float32Array(16 * 2);
 
-  constructor(
-    device: GPUDevice,
-    colorFormat: GPUTextureFormat,
-    depthFormat: GPUTextureFormat,
-    sampleCount: number = 1,
-  ) {
+  font?: MsdfFont;
+
+  depthStencilAttachment: GPURenderPassDepthStencilAttachment;
+  renderPassDescriptor: GPURenderPassDescriptor;
+  colorAttachment: GPURenderPassColorAttachment;
+  projectionMatrix: Float32Array;
+
+  debug: boolean;
+
+  canvasSizeBuffer?: GPUBuffer;
+
+  constructor({
+    device,
+    canvas,
+    context,
+    clearColor,
+    debug = false,
+  }: {
+    device: GPUDevice;
+    canvas: HTMLCanvasElement;
+    context: GPUCanvasContext;
+    clearColor: string;
+    debug?: boolean;
+  }) {
+    const colorFormat = navigator.gpu.getPreferredCanvasFormat();
+
     this.device = device;
-    this.sampleCount = sampleCount;
+    this.canvas = canvas;
+    this.context = context;
+
+    this.sampleCount = 1;
+    this.debug = debug;
+
     this.renderBundleDescriptor = {
       colorFormats: [colorFormat],
-      depthStencilFormat: depthFormat,
-      sampleCount,
+      depthStencilFormat: "depth24plus",
+      sampleCount: 1,
     };
 
     this.sampler = device.createSampler({
@@ -85,7 +123,17 @@ export default class MsdfTextRenderer {
           visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
           buffer: { type: "read-only-storage" },
         },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: { type: "read-only-storage" },
+        },
       ],
+    });
+
+    this.canvasSizeBindGroupLayout = device.createBindGroupLayout({
+      label: "MSDF canvas size group layout",
+      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: "uniform" } }],
     });
 
     const shaderModule = device.createShaderModule({
@@ -96,7 +144,7 @@ export default class MsdfTextRenderer {
     this.pipeline = device.createRenderPipeline({
       label: `msdf text pipeline`,
       layout: device.createPipelineLayout({
-        bindGroupLayouts: [this.fontBindGroupLayout, this.textBindGroupLayout],
+        bindGroupLayouts: [this.fontBindGroupLayout, this.textBindGroupLayout, this.canvasSizeBindGroupLayout],
       }),
       vertex: {
         module: shaderModule,
@@ -128,15 +176,75 @@ export default class MsdfTextRenderer {
       depthStencil: {
         depthWriteEnabled: false,
         depthCompare: "less",
-        format: depthFormat,
+        format: "depth24plus",
       },
       multisample: {
-        count: sampleCount,
+        count: 1,
       },
+    });
+
+    this.colorAttachment = {
+      view: context.getCurrentTexture().createView(),
+      clearValue: hexToGPUVec4f(clearColor),
+      loadOp: "clear",
+      storeOp: "store",
+    };
+
+    this.depthStencilAttachment = {
+      view: device
+        .createTexture({
+          size: [canvas.width, canvas.height],
+          format: "depth24plus",
+          usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        })
+        .createView(),
+      depthClearValue: 1.0,
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
+    };
+
+    this.renderPassDescriptor = {
+      colorAttachments: [this.colorAttachment],
+      depthStencilAttachment: this.depthStencilAttachment,
+    };
+
+    this.projectionMatrix = ortho(canvas.width, canvas.height);
+
+    window.addEventListener("resize", () => {
+      this.canvas.width = this.canvas.clientWidth * devicePixelRatio;
+      this.canvas.height = this.canvas.clientHeight * devicePixelRatio;
+
+      this.depthStencilAttachment.view = this.device
+        .createTexture({
+          size: [this.canvas.width, this.canvas.height],
+          format: "depth24plus",
+          usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        })
+        .createView();
+
+      this.projectionMatrix = ortho(this.canvas.width, this.canvas.height);
+
+      assert(this.canvasSizeBuffer, "Canvas size buffer must be created before resizing");
+      const canvasSize = new Float32Array([
+        this.canvas.width / devicePixelRatio,
+        this.canvas.height / devicePixelRatio,
+      ]);
+
+      console.log(canvasSize);
+
+      this.device.queue.writeBuffer(this.canvasSizeBuffer, 0, canvasSize);
+
+      this.render();
     });
   }
 
-  createFont(fontArtefacts: FontArtefacts): MsdfFont {
+  fetchFontArtefacts(url: string): Promise<FontArtefacts> {
+    return fetchFontArtefacts(url, this.device);
+  }
+
+  async loadFont(url: string): Promise<MsdfFont> {
+    const fontArtefacts = await this.fetchFontArtefacts(url);
+
     const { json, pageTextures, kernings } = fontArtefacts;
 
     const charCount = json.chars.length;
@@ -165,7 +273,7 @@ export default class MsdfTextRenderer {
       charsArray[offset + 4] = char.width; // size.x
       charsArray[offset + 5] = char.height; // size.y
       charsArray[offset + 6] = char.xoffset; // offset.x
-      charsArray[offset + 7] = -char.yoffset; // offset.y
+      charsArray[offset + 7] = -1 * char.yoffset; // offset.y
       offset += 8;
     }
 
@@ -191,10 +299,22 @@ export default class MsdfTextRenderer {
       ],
     });
 
-    return new MsdfFont(this.pipeline, bindGroup, json.common.lineHeight, chars, kernings);
+    this.font = new MsdfFont({
+      pipeline: this.pipeline,
+      bindGroup,
+      lineHeight: json.common.lineHeight,
+      lineBase: json.common.base,
+      size: json.info.size,
+      chars,
+      kernings,
+    });
+
+    return this.font;
   }
 
-  formatText(font: MsdfFont, text: string, options: MsdfTextFormattingOptions = {}): MsdfText {
+  formatText(text: string, options: MsdfTextFormattingOptions = {}): void {
+    assert(this.font, "Font must be loaded before formatting text");
+
     const textBuffer = this.device.createBuffer({
       label: "msdf text buffer",
       size: (6 + text.length) * Float32Array.BYTES_PER_ELEMENT * 4,
@@ -207,9 +327,9 @@ export default class MsdfTextRenderer {
 
     let measurements: MsdfTextMeasurements;
     if (options.centered) {
-      measurements = this.measureText(font, text);
+      measurements = this.measureText(this.font, text);
 
-      this.measureText(font, text, (textX: number, textY: number, line: number, char: MsdfChar) => {
+      this.measureText(this.font, text, (textX: number, textY: number, line: number, char: MsdfChar) => {
         const lineOffset = measurements.width * -0.5 - (measurements.width - measurements.lineWidths[line]) * -0.5;
 
         textArray[offset] = textX + lineOffset;
@@ -218,15 +338,32 @@ export default class MsdfTextRenderer {
         offset += 4;
       });
     } else {
-      measurements = this.measureText(font, text, (textX: number, textY: number, _line: number, char: MsdfChar) => {
-        textArray[offset] = textX;
-        textArray[offset + 1] = textY;
-        textArray[offset + 2] = char.charIndex;
-        offset += 4;
-      });
+      measurements = this.measureText(
+        this.font,
+        text,
+        (textX: number, textY: number, _line: number, char: MsdfChar) => {
+          textArray[offset] = textX;
+          textArray[offset + 1] = textY;
+          textArray[offset + 2] = char.charIndex;
+          offset += 4;
+        },
+      );
     }
 
     textBuffer.unmap();
+
+    const textOffsetBuffer = this.device.createBuffer({
+      label: "msdf text offset buffer",
+      size: 2 * Float32Array.BYTES_PER_ELEMENT,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: true,
+    });
+
+    const textOffsetArray = new Float32Array(textOffsetBuffer.getMappedRange());
+    textOffsetArray[0] = options.offsetLeft ?? 0;
+    textOffsetArray[1] = options.offsetTop ?? 0;
+
+    textOffsetBuffer.unmap();
 
     const bindGroup = this.device.createBindGroup({
       label: "msdf text bind group",
@@ -240,33 +377,61 @@ export default class MsdfTextRenderer {
           binding: 1,
           resource: { buffer: textBuffer },
         },
+        {
+          binding: 2,
+          resource: { buffer: textOffsetBuffer },
+        },
       ],
     });
 
+    this.canvasSizeBuffer = this.device.createBuffer({
+      size: 2 * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    assert(this.canvasSizeBuffer, "Canvas size buffer must be created before resizing");
+    const canvasSize = new Float32Array([this.canvas.width / devicePixelRatio, this.canvas.height / devicePixelRatio]);
+
+    this.device.queue.writeBuffer(this.canvasSizeBuffer, 0, canvasSize);
+
+    const canvasSizeBindGroup = this.device.createBindGroup({
+      layout: this.canvasSizeBindGroupLayout,
+      entries: [
+        {
+          binding: 0,
+          resource: { buffer: this.canvasSizeBuffer },
+        },
+      ],
+      label: "canvas size bind group",
+    });
+
     const encoder = this.device.createRenderBundleEncoder(this.renderBundleDescriptor);
-    encoder.setPipeline(font.pipeline);
-    encoder.setBindGroup(0, font.bindGroup);
+    encoder.setPipeline(this.font.pipeline);
+    encoder.setBindGroup(0, this.font.bindGroup);
     encoder.setBindGroup(1, bindGroup);
+    encoder.setBindGroup(2, canvasSizeBindGroup);
     encoder.draw(4, measurements.printedCharCount);
     const renderBundle = encoder.finish();
 
-    const msdfText = new MsdfText(this.device, renderBundle, measurements, font, textBuffer);
+    const msdfText = new MsdfText({
+      device: this.device,
+      renderBundle,
+      measurements,
+      font: this.font,
+      textBuffer,
+      offsetLeft: options.offsetLeft ?? 0,
+      offsetTop: options.offsetTop ?? 0,
+    });
 
-    // Calculate scale based on font size in pixels
-    if (options.fontSize !== undefined) {
-      const baseFontSize = font.lineHeight;
-      const scale = options.fontSize / baseFontSize;
-      msdfText.setPixelScale(scale);
-    } else {
-      options.pixelScale ??= 1 / 512;
-      msdfText.setPixelScale(options.pixelScale);
-    }
+    const fontSize = options.fontSize ?? 16;
+    const scale = (fontSize / this.font.lineHeight) * devicePixelRatio;
+
+    msdfText.setPixelScale(scale);
 
     if (options.color !== undefined) {
-      msdfText.setColor(...options.color);
+      msdfText.setColor(...hexToGPUVec4f(options.color));
     }
 
-    return msdfText;
+    this.texts.add(msdfText);
   }
 
   measureText(
@@ -282,6 +447,7 @@ export default class MsdfTextRenderer {
     let line = 0;
     let printedCharCount = 0;
     let nextCharCode = text.charCodeAt(0);
+
     for (let i = 0; i < text.length; ++i) {
       const charCode = nextCharCode;
       nextCharCode = i < text.length - 1 ? text.charCodeAt(i + 1) : -1;
@@ -311,13 +477,16 @@ export default class MsdfTextRenderer {
     }
 
     lineWidths.push(textOffsetX);
-    maxWidth = Math.max(maxWidth, textOffsetX);
+    maxWidth = Math.max(...lineWidths);
 
     return {
       width: maxWidth,
-      height: lineWidths.length * font.lineHeight,
+      height: (line + 1) * font.lineBase,
       lineWidths,
       printedCharCount,
+      lineCount: line + 1,
+      lineHeight: font.lineHeight,
+      textOffsetY,
     };
   }
 
@@ -327,9 +496,115 @@ export default class MsdfTextRenderer {
     this.device.queue.writeBuffer(this.cameraUniformBuffer, 0, this.cameraArray);
   }
 
-  render(renderPass: GPURenderPassEncoder, ...text: MsdfText[]) {
-    const renderBundles = text.map((t) => t.getRenderBundle());
+  render() {
+    this.colorAttachment.view = this.context.getCurrentTexture().createView();
 
-    renderPass.executeBundles(renderBundles);
+    const commandEncoder = this.device.createCommandEncoder();
+    const passEncoder = commandEncoder.beginRenderPass(this.renderPassDescriptor);
+
+    const viewMatrix = mat4.identity();
+    this.updateCamera(this.projectionMatrix, viewMatrix);
+
+    const renderBundles = Array.from(this.texts).map((t) => t.getRenderBundle());
+
+    passEncoder.executeBundles(renderBundles);
+
+    if (this.debug) {
+      for (const text of Array.from(this.texts)) {
+        this.drawRect({ passEncoder, text, color: "#FF0000" });
+      }
+    }
+
+    passEncoder.end();
+
+    this.device.queue.submit([commandEncoder.finish()]);
+  }
+
+  drawRect({ passEncoder, text, color }: { passEncoder: GPURenderPassEncoder; text: MsdfText; color: string }) {
+    // // Get bounding box from text measurements
+    const x = ((2.0 * text.offsetLeft) / this.canvas.width) * devicePixelRatio;
+    const y = ((2.0 * text.offsetTop) / this.canvas.height) * devicePixelRatio;
+    const width = (text.measurements.width / this.canvas.width) * devicePixelRatio;
+    const height = (text.measurements.height / this.canvas.height) * devicePixelRatio;
+
+    console.log(
+      JSON.stringify(text.measurements, null, 2),
+      2 + (1 * text.measurements.textOffsetY) / this.canvas.height / devicePixelRatio,
+      height,
+    );
+
+    // Rectangle corners (clockwise)
+    // 1. Top left
+    // 2. Top right
+    // 3. Bottom right
+    // 4. Bottom left
+    // 5. Top left (again to close the loop)
+
+    const topLeftCorner = [x, y];
+    const topRightCorner = [x + width, y];
+    const bottomRightCorner = [x + width, y + height];
+    const bottomLeftCorner = [x, y + height];
+
+    const vertices = new Float32Array([
+      ...topLeftCorner,
+      ...topRightCorner,
+      ...bottomRightCorner,
+      ...bottomLeftCorner,
+      ...topLeftCorner,
+    ]);
+
+    // Create vertex buffer
+    const vertexBuffer = this.device.createBuffer({
+      size: vertices.byteLength,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(vertexBuffer, 0, vertices);
+
+    // Color as vec4
+    const colorVec = new Float32Array(hexToGPUVec4f(color));
+    const colorBuffer = this.device.createBuffer({
+      size: 4 * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(colorBuffer, 0, colorVec);
+
+    // Pipeline
+    const pipeline = this.device.createRenderPipeline({
+      layout: "auto",
+      vertex: {
+        module: this.device.createShaderModule({ code: debugRectShader }),
+        entryPoint: "main_vertex",
+        buffers: [
+          {
+            arrayStride: 2 * 4,
+            attributes: [{ shaderLocation: 0, offset: 0, format: "float32x2" }],
+          },
+        ],
+      },
+      fragment: {
+        module: this.device.createShaderModule({ code: debugRectShader }),
+        entryPoint: "main_fragment",
+        targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }],
+      },
+      primitive: { topology: "line-strip" },
+      depthStencil: {
+        format: "depth24plus",
+        depthWriteEnabled: false,
+        depthCompare: "always",
+      },
+    });
+
+    passEncoder.setPipeline(pipeline);
+    passEncoder.setVertexBuffer(0, vertexBuffer);
+    passEncoder.setBindGroup(
+      0,
+      this.device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [{ binding: 0, resource: { buffer: colorBuffer } }],
+      }),
+    );
+    passEncoder.draw(5);
+    // passEncoder.end();
+    // device.queue.submit([this.device.createCommandEncoder().finish()]);
   }
 }

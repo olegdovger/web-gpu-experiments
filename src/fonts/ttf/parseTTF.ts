@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { BinaryReader, Fixed, FWord, Int16, Uint16, Uint32 } from "./BinaryReader.ts";
 
 interface ParseSettings {
@@ -37,31 +37,31 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
       const calculated = calculateChecksum(
         reader.getDataSlice(tables[tag].offset, 4 * Math.ceil(tables[tag].length / 4)),
       );
-      invariant(calculated === tables[tag].checksum, `Checksum for table ${tag} is invalid.`);
+      assert(calculated === tables[tag].checksum, `Checksum for table ${tag} is invalid.`);
     }
   }
 
   const shared = "table is missing. Please use other font variant that contains it.";
 
-  invariant(tables["head"].offset, `head ${shared}`);
+  assert(tables["head"].offset, `head ${shared}`);
   ttf.head = readHeadTable(reader, tables["head"].offset);
 
-  invariant(tables["cmap"].offset, `cmap ${shared}`);
+  assert(tables["cmap"].offset, `cmap ${shared}`);
   ttf.cmap = readCmapTable(reader, tables["cmap"].offset);
 
-  invariant(tables["maxp"].offset, `maxp ${shared}`);
+  assert(tables["maxp"].offset, `maxp ${shared}`);
   ttf.maxp = readMaxpTable(reader, tables["maxp"].offset);
 
-  invariant(tables["hhea"].offset, `hhea ${shared}`);
+  assert(tables["hhea"].offset, `hhea ${shared}`);
   ttf.hhea = readHheaTable(reader, tables["hhea"].offset);
 
-  invariant(tables["hmtx"].offset, `hmtx ${shared}`);
+  assert(tables["hmtx"].offset, `hmtx ${shared}`);
   ttf.hmtx = readHmtxTable(reader, tables["hmtx"].offset, ttf.maxp?.numGlyphs, ttf.hhea?.numberOfHMetrics);
 
-  invariant(tables["loca"].offset, `loca ${shared}`);
+  assert(tables["loca"].offset, `loca ${shared}`);
   ttf.loca = readLocaTable(reader, tables["loca"].offset, ttf.maxp?.numGlyphs, ttf.head?.indexToLocFormat);
 
-  invariant(tables["glyf"].offset, `glyf ${shared}`);
+  assert(tables["glyf"].offset, `glyf ${shared}`);
   ttf.glyf = readGlyfTable(reader, tables["glyf"].offset, ttf.loca, ttf.head?.indexToLocFormat);
 
   if (tables["GPOS"]) {
@@ -76,7 +76,7 @@ export function parseTTF(data: ArrayBuffer, { debug }: ParseSettings): TTF {
  */
 function calculateChecksum(data: Uint8Array): number {
   const nlongs = data.length / 4;
-  invariant(nlongs === Math.floor(nlongs), "Data length must be divisible by 4.");
+  assert(nlongs === Math.floor(nlongs), "Data length must be divisible by 4.");
 
   let sum = 0;
   for (let i = 0; i < nlongs; i++) {
@@ -116,7 +116,7 @@ function readHeadTable(reader: BinaryReader, offset: number): HeadTable {
     glyphDataFormat: reader.getInt16(),
   };
 
-  invariant(head.magicNumber === 0x5f0f3cf5, "Invalid magic number.");
+  assert(head.magicNumber === 0x5f0f3cf5, "Invalid magic number.");
 
   reader.setPosition(position);
   return head;
@@ -130,7 +130,7 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
   reader.setPosition(offset);
 
   const version = reader.getUint16();
-  invariant(version === 0, "Invalid cmap table version.");
+  assert(version === 0, "Invalid cmap table version.");
 
   const numTables = reader.getUint16();
   const encodingRecords: {
@@ -157,10 +157,10 @@ function readCmapTable(reader: BinaryReader, offset: number): CmapTable {
     }
   }
 
-  invariant(selectedOffset !== null, "No supported cmap table found.");
+  assert(selectedOffset !== null, "No supported cmap table found.");
   const format = reader.getUint16();
 
-  invariant(format === 4, `Unsupported cmap table format. Expected 4, found ${format}.`);
+  assert(format === 4, `Unsupported cmap table format. Expected 4, found ${format}.`);
 
   const length = reader.getUint16();
   const language = reader.getUint16();
@@ -256,7 +256,7 @@ function readMaxpTable(reader: BinaryReader, offset: number): MaxpTable {
   const version = reader.getUint32();
   const versionString = version === 0x00005000 ? "0.5" : version === 0x00010000 ? "1.0" : null;
 
-  invariant(
+  assert(
     versionString,
     `Unsupported maxp table version (expected 0x00005000 or 0x00010000 but found ${version.toString(16)}).`,
   );
@@ -363,7 +363,7 @@ function readHmtxTable(
     leftSideBearings,
   };
 
-  invariant(
+  assert(
     hMetrics.length + leftSideBearings.length === numGlyphs,
     `The number of hMetrics (${hMetrics.length}) plus the number of left side bearings (${leftSideBearings.length}) must equal the number of glyphs (${numGlyphs}).`,
   );
@@ -427,7 +427,7 @@ function readGPOSTable(reader: BinaryReader, offset: number, debug: boolean): GP
   const major = reader.getUint16();
   const minor = reader.getUint16();
 
-  invariant(major === 1 && minor === 0, "Only GPOS version 1.0 is supported.");
+  assert(major === 1 && minor === 0, "Only GPOS version 1.0 is supported.");
 
   reader.getUint16(); // scriptListOffset
 
@@ -526,7 +526,7 @@ function readGPOSTable(reader: BinaryReader, offset: number, debug: boolean): GP
         reader.runAt(offset + lookupListOffset + lookupTables[i] + subTableOffsets[j] + extensionOffset, () => {
           if (extensionLookupType === LookupType.PairAdjustment) {
             const posFormat = reader.getUint16();
-            invariant(posFormat === 1 || posFormat === 2, "Invalid posFormat.");
+            assert(posFormat === 1 || posFormat === 2, "Invalid posFormat.");
             extension.posFormat = posFormat;
 
             if (posFormat === 1) {

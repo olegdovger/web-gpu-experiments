@@ -1,8 +1,8 @@
 import { getCanvasElement } from "~/utils/getCanvasElement";
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert";
 import { Renderer } from "./src/Renderer";
 
-invariant(navigator.gpu, "WebGPU is not supported");
+assert(navigator.gpu, "WebGPU is not supported");
 
 const canvas = getCanvasElement("sample");
 

@@ -1,9 +1,9 @@
 import { getCanvasElement } from "~/utils/getCanvasElement";
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert";
 import setupDevice from "~/utils/setupDevice";
 import shaderCode from "./shader.wgsl?raw";
 
-invariant(navigator.gpu, "WebGPU is not supported");
+assert(navigator.gpu, "WebGPU is not supported");
 
 const canvas = getCanvasElement("sample");
 const { device, context, format } = await setupDevice(canvas);
