@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { Vec2 } from "./math/Vec2.ts";
 import { Lookups } from "./prepareLookups.ts";
 import { ATLAS_FONT_SIZE, ATLAS_GAP } from "./renderFontAtlas.ts";
@@ -22,7 +22,7 @@ export function getTextShape(lookups: Lookups, text: string, fontSize: number): 
   for (let i = 0; i < text.length; i++) {
     const character = text[i].charCodeAt(0);
     const glyph = lookups.glyphs.get(character);
-    invariant(glyph, `\nGlyph not found for character ${text[i]}\n  character position: ${i}\n  text: "${text}"`);
+    assert(glyph, `\nGlyph not found for character ${text[i]}\n  character position: ${i}\n  text: "${text}"`);
 
     const { y, width, height, lsb, rsb } = glyph;
 

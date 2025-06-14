@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { TTF } from "./parseTTF.ts";
 
 export type Glyph = {
@@ -28,15 +28,15 @@ export function calculateGlyphQuads(ttf: TTF, alphabet?: string): Glyph[] {
   const charCodes = alphabet ? alphabet.split("").map((c) => c.charCodeAt(0)) : [...ttf.cmap.glyphIndexMap.keys()];
 
   return charCodes.map((code) => {
-    invariant(ttf, "TTF is missing.");
+    assert(ttf, "TTF is missing.");
 
     const index = ttf.cmap.glyphIndexMap.get(code);
 
-    invariant(index, `Couldn't find index for character '${String.fromCharCode(code)}' in glyphIndexMap.`);
-    invariant(index < ttf.glyf.length, "Index is out of bounds for glyf table.");
+    assert(index, `Couldn't find index for character '${String.fromCharCode(code)}' in glyphIndexMap.`);
+    assert(index < ttf.glyf.length, "Index is out of bounds for glyf table.");
 
     const lastMetric = ttf.hmtx.hMetrics.at(-1);
-    invariant(lastMetric, "The last advance is missing, which means that hmtx table is probably empty.");
+    assert(lastMetric, "The last advance is missing, which means that hmtx table is probably empty.");
 
     const hmtx =
       index < ttf.hhea.numberOfHMetrics

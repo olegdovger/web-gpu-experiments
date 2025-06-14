@@ -21,7 +21,7 @@
     "@types/dom-webcodecs": "^0.1.11",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
-    "@webgpu/types": "^0.1.51",
+    "@webgpu/types": "^0.1.60",
     "eslint": "^8.57.0",
     "fast-xml-parser": "^5.0.6",
     "husky": "^9.0.11",

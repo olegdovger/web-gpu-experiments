@@ -1,5 +1,5 @@
 import { getCanvasElement } from "~/utils/getCanvasElement";
-import { invariant } from "~/utils/invariant.ts";
+import { assert } from "~/utils/assert";
 import setupDevice from "~/utils/setupDevice";
 import squareShaderCode from "./square.shader.wgsl?raw";
 import circleShaderCode from "./circle.shader.wgsl?raw";
@@ -7,12 +7,18 @@ import setOptimalResizeObserver from "~/utils/setOptimalResizeObserver";
 import { setupCanvas } from "~/utils/setupCanvas";
 import { clearValue } from "~/constants";
 
-invariant(navigator.gpu, "WebGPU is not supported");
+assert(navigator.gpu, "WebGPU is not supported");
 
 const canvas = getCanvasElement("sample");
 setupCanvas(canvas);
 
 const { device, context, format } = await setupDevice(canvas);
+
+context.configure({
+  device,
+  format,
+  alphaMode: "premultiplied",
+});
 
 const buffers = {
   resolution: device.createBuffer({
@@ -40,12 +46,6 @@ const buffers = {
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   }),
 };
-
-context.configure({
-  device,
-  format,
-  alphaMode: "premultiplied",
-});
 
 const squarePipeline = device.createRenderPipeline({
   layout: "auto",

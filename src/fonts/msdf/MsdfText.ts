@@ -6,16 +6,42 @@ export class MsdfText {
   private bufferArray = new Float32Array(24);
   private bufferArrayDirty = true;
 
-  constructor(
-    public device: GPUDevice,
-    private renderBundle: GPURenderBundle,
-    public measurements: MsdfTextMeasurements,
-    public font: MsdfFont,
-    public textBuffer: GPUBuffer,
-  ) {
+  public device: GPUDevice;
+  private renderBundle: GPURenderBundle;
+  public measurements: MsdfTextMeasurements;
+  public font: MsdfFont;
+  public textBuffer: GPUBuffer;
+  public offsetLeft: number;
+  public offsetTop: number;
+
+  constructor({
+    device,
+    renderBundle,
+    measurements,
+    font,
+    textBuffer,
+    offsetLeft,
+    offsetTop,
+  }: {
+    device: GPUDevice;
+    renderBundle: GPURenderBundle;
+    measurements: MsdfTextMeasurements;
+    font: MsdfFont;
+    textBuffer: GPUBuffer;
+    offsetLeft: number;
+    offsetTop: number;
+  }) {
+    this.device = device;
+    this.renderBundle = renderBundle;
+    this.measurements = measurements;
+    this.font = font;
+    this.textBuffer = textBuffer;
+
+    this.offsetLeft = offsetLeft;
+    this.offsetTop = offsetTop;
+
     mat4.identity(this.bufferArray);
-    this.setColor(1, 1, 1, 1);
-    this.setPixelScale(1 / 512);
+    this.setColor(0, 0, 0, 1);
     this.bufferArrayDirty = true;
   }
 

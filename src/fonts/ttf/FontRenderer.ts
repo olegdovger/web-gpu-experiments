@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { Vec2 } from "./math/Vec2.ts";
 import { Vec4 } from "./math/Vec4.ts";
 import { Lookups } from "./prepareLookups.ts";
@@ -179,7 +179,7 @@ export class FontRenderer {
   }
 
   text(text: string, position: Vec2, fontSize: number, color?: Vec4): TextShape {
-    invariant(this.fontLookups, "Font must be set.");
+    assert(this.fontLookups, "Font must be set.");
     const shape = getTextShape(this.fontLookups, text, fontSize);
 
     for (let i = 0; i < shape.positions.length; i++) {
@@ -187,7 +187,7 @@ export class FontRenderer {
       const size = shape.sizes[i];
 
       const uv = this.fontLookups.uvs.get(text[i].charCodeAt(0));
-      invariant(uv, "UV does not exist.");
+      assert(uv, "UV does not exist.");
 
       const colorRed = color?.x ?? this.fontColorValue?.r;
       const colorGreen = color?.y ?? this.fontColorValue?.g;
@@ -232,7 +232,7 @@ export class FontRenderer {
   }
 
   render(): void {
-    invariant(this.context, "Context does not exist.");
+    assert(this.context, "Context does not exist.");
 
     const commandEncoder = this.device.createCommandEncoder();
     const renderPass = commandEncoder.beginRenderPass({

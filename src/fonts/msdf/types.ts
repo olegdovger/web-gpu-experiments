@@ -1,9 +1,14 @@
 export type MSDFJson = {
+  info: MsdfInfo;
   pages: string[];
   common: MsdfCommon;
   chars: MsdfChar[];
   kernings: MsdfKerning[];
 };
+
+export interface MsdfInfo {
+  size: number;
+}
 
 export interface MsdfChar {
   id: number;
@@ -55,4 +60,7 @@ export interface MsdfTextMeasurements {
   height: number;
   lineWidths: number[];
   printedCharCount: number;
+  lineCount: number;
+  lineHeight: number;
+  textOffsetY: number;
 }

@@ -43,6 +43,11 @@ var<storage> chars: array<Char>;
 var<uniform> camera: Camera;
 @group(1) @binding(1)
 var<storage> text: FormattedText;
+@group(1) @binding(2)
+var<storage> textOffset: vec2f;
+
+@group(2) @binding(0)
+var<uniform> canvasSize: vec2f;
 
 @vertex
 fn vertexMain(input: VertexInput) -> VertexOutput {
@@ -52,9 +57,10 @@ fn vertexMain(input: VertexInput) -> VertexOutput {
 
   var output: VertexOutput;
   output.position = camera.projection * camera.view * text.transform * vec4f(charPos, 0, 1);
-  // output.position = text.transform * vec4f(charPos, 0, 1);
+  output.position.x += 2.0 * textOffset.x / canvasSize.x;
+  output.position.y -= 2.0 * textOffset.y / canvasSize.y;
 
-  output.texcoord = pos[input.vertex] * vec2f(1, -1);
+  output.texcoord = pos[input.vertex] * vec2f(1, - 1);
   output.texcoord *= _char.texExtent;
   output.texcoord += _char.texOffset;
   return output;
@@ -81,7 +87,7 @@ fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
 
   let edgeWidth = .5;
 
-  let alpha = smoothstep(-edgeWidth, edgeWidth, pxDist);
+  let alpha = smoothstep(- edgeWidth, edgeWidth, pxDist);
 
   if (alpha < 0.001) {
     discard;

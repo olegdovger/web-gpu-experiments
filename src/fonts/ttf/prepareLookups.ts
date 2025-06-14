@@ -1,4 +1,4 @@
-import { invariant } from "../../utils/invariant.ts";
+import { assert } from "../../utils/assert.ts";
 import { Vec2 } from "./math/Vec2.ts";
 import { Vec4 } from "./math/Vec4.ts";
 import { packShelves } from "./math/packShelves.ts";
@@ -34,10 +34,7 @@ export function prepareLookups(
   const transform = (x: number): number => Math.ceil(x * scale);
   const sizes = glyphs.map((g) => new Vec2(transform(g.width) + ATLAS_GAP * 2, transform(g.height) + ATLAS_GAP * 2));
   const packing = packShelves(sizes);
-  invariant(
-    packing.positions.length === glyphs.length,
-    `Packing produced different number of positions than expected.`,
-  );
+  assert(packing.positions.length === glyphs.length, `Packing produced different number of positions than expected.`);
 
   const atlas = {
     width: packing.width,
@@ -144,8 +141,8 @@ export function prepareLookups(
 
       const firstGlyphID = ttf.cmap.glyphIndexMap.get(firstCharacter);
       const secondGlyphID = ttf.cmap.glyphIndexMap.get(secondCharacter);
-      invariant(firstGlyphID, `Glyph not found for: "${firstCharacter}"`);
-      invariant(secondGlyphID, `Glyph not found for: "${secondCharacter}"`);
+      assert(firstGlyphID, `Glyph not found for: "${firstCharacter}"`);
+      assert(secondGlyphID, `Glyph not found for: "${secondCharacter}"`);
 
       const firstMap = kerningPairs.get(firstGlyphID);
       if (firstMap) {

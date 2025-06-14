@@ -1,4 +1,4 @@
-import { invariant } from "../../../utils/invariant.ts";
+import { assert } from "../../../utils/assert.ts";
 import { Vec2 } from "./Vec2.ts";
 
 export type Packing = {
@@ -53,7 +53,7 @@ export function packShelves(sizes: Vec2[]): Packing {
 
       if (box.width === region.width && box.height === region.height) {
         const last = regions.pop();
-        invariant(last, "Regions array should not be empty.");
+        assert(last, "Regions array should not be empty.");
 
         if (i < regions.length) {
           regions[i] = last;

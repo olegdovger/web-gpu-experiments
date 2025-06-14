@@ -1,5 +1,5 @@
 import { FontRenderer } from "../fonts/ttf/FontRenderer.ts";
-import { invariant, tryGet } from "../utils/invariant.ts";
+import { assert, tryGet } from "../utils/assert.ts";
 import ElementSizeWatcher from "./ElementSizeWatcher.ts";
 import initFontRenderer, { LoadFontProps, LoadFontSettings } from "./WebGPUEngine/initFontRenderer.ts";
 
@@ -81,7 +81,7 @@ class WebGPUEngine {
 
       const context = canvas.getContext("webgpu");
 
-      invariant(context, "WebGPU context is not available.");
+      assert(context, "WebGPU context is not available.");
 
       this.context = context;
 
@@ -131,7 +131,7 @@ class WebGPUEngine {
         },
       );
 
-      invariant(postRender, "No post-render function provided");
+      assert(postRender, "No post-render function provided");
 
       postRender({
         device: this.device,
